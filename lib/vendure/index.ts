@@ -118,10 +118,6 @@ export async function vendureFetch<T>({
   }
 }
 
-const removeEdgesAndNodes = (array: Connection<any>) => {
-  return array.edges.map((edge) => edge?.node);
-};
-
 const reshapeCart = (cart: VendureCart): Cart => {
   if (!cart.cost?.totalTaxAmount) {
     cart.cost.totalTaxAmount = {
@@ -132,7 +128,7 @@ const reshapeCart = (cart: VendureCart): Cart => {
 
   return {
     ...cart,
-    lines: removeEdgesAndNodes(cart.lines)
+    lines: cart.lines
   };
 };
 
@@ -291,7 +287,7 @@ export async function getCollections(): Promise<Collection[]> {
     query: getCollectionsQuery,
     tags: [TAGS.collections]
   });
-  const shopifyCollections = removeEdgesAndNodes(res.body?.data?.collections);
+  const vendureCollections = removeEdgesAndNodes(res.body?.data?.collections);
   const collections = [
     {
       handle: '',
@@ -306,7 +302,7 @@ export async function getCollections(): Promise<Collection[]> {
     },
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
-    ...reshapeCollections(shopifyCollections).filter(
+    ...reshapeCollections(vendureCollections).filter(
       (collection) => !collection.handle.startsWith('hidden')
     )
   ];

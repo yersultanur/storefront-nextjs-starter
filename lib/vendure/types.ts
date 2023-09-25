@@ -88,13 +88,6 @@ type Breadcrumb = {
 };
 
 export type Collection = VendureCollection & {
-  id: string;
-  slug: string;
-  name: string;
-  breadcrumbs?: Breadcrumb[];
-  parent?: { name: '__root_collection__' };
-  featuredAsset?: { id: string; preview: string };
-  children: any[];
   path: string;
 };
 

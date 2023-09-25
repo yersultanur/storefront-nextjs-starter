@@ -3,7 +3,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: ["https://readonlydemo.vendure.io/shop-api",
+  schema: ["http://localhost:3000/shop-api",
     'type Mutation { createStripePaymentIntent: String }',
     'type Query { generateBraintreeClientToken: String }'
   ],
