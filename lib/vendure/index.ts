@@ -18,11 +18,11 @@ import {
   VendureUpdateCartOperation,
   VendureCartOperation,
   VendureCollectionProductsOperation,
+  VendureCollectionOperation,
   Asset,
   Variant,
   ShippingAddress,
   Line,
-  ActiveOrder,
   OrderPriceFields,
   Search,
   FacetWithValues,
@@ -145,6 +145,7 @@ const reshapeCollection = (collection: VendureCollection): Collection | undefine
 };
 
 const reshapeCollections = (collections: Collection[]) => {
+  const description = collections.description || collections.metadata?.description?.toString() || '';
   const reshapedCollections = [];
 
   for (const collection of collections) {
@@ -271,7 +272,7 @@ export async function getCart(cartId: string): Promise<Cart | undefined> {
 }
 
 export async function getCollection(handle: string): Promise<Collection | undefined> {
-  const res = await vendureFetch<Collection>({
+  const res = await vendureFetch<VendureCollectionOperation>({
     query: getCollectionQuery,
     tags: [TAGS.collections],
     variables: {
@@ -279,7 +280,7 @@ export async function getCollection(handle: string): Promise<Collection | undefi
     }
   });
 
-  return reshapeCollection(res.collection);
+  return reshapeCollection(res.body.data.collection);
 }
 
 export async function getCollections(): Promise<Collection[]> {

@@ -32,7 +32,7 @@ type Tag = {
 
 export type AppState = {
   collections: CollectionGql[];
-  activeOrder: Order;
+  VendureCart: Order;
   showCart: boolean;
   customer: ActiveCustomer;
   shippingAddress: ShippingAddress;
@@ -94,6 +94,14 @@ export type VendureCollection = {
 export type VendureCollectionsOperation = {
   data: {
     collections: VendureCollection;
+  };
+};
+export type VendureCollectionOperation = {
+  data: {
+    collection: VendureCollection;
+  };
+  variables: {
+    handle: string;
   };
 };
 
@@ -167,19 +175,6 @@ export type VendureCartOperation = {
   };
 };
 
-export type VendureCart = {
-  id: string;
-  checkoutUrl: string;
-  cost: {
-    subtotalAmount: Money;
-    totalAmount: Money;
-    totalTaxAmount: Money;
-  };
-  lines: CartItem;
-  totalQuantity: number;
-};
-
-
 export type SEO = {
   title: string;
   description: string;
@@ -222,7 +217,7 @@ export type Variant = {
   featuredAsset?: any;
 };
 
-// activeOrder
+// VendureCart
 
 type TaxSummary = {
   description: string;
@@ -269,7 +264,7 @@ export type Line = {
   productVariant: ProductVariant;
 };
 
-export type ActiveOrder = {
+export type VendureCart = {
   __typename: string;
   id: string;
   code: string;
@@ -319,7 +314,7 @@ export type CartItem = VendureLineItem & {
 };
 
 export type OrderPriceFields = keyof Pick<
-  ActiveOrder,
+  VendureCart,
   'subTotal' | 'totalWithTax' | 'subTotalWithTax' | 'shippingWithTax'
 >;
 
