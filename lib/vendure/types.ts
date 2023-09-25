@@ -205,6 +205,9 @@ type FeaturedAsset = {
 export type Asset = {
   id: string;
   preview: string;
+  width: number;
+  height: number;
+  name: string;
 };
 
 export type Variant = {
@@ -265,7 +268,6 @@ export type Line = {
 };
 
 export type VendureCart = {
-  __typename: string;
   id: string;
   code: string;
   active: boolean;
@@ -273,11 +275,12 @@ export type VendureCart = {
   state: string;
   currencyCode: CurrencyCode;
   totalQuantity: number;
-  subTotal: number;
+  subTotal: Money;
   subTotalWithTax: number;
   taxSummary: TaxSummary[];
   shippingWithTax: number;
-  totalWithTax: number;
+  total: Money;
+  totalWithTax: Money;
   customer?: any;
   shippingAddress: ShippingAddress;
   shippingLines: ShippingLine[];
@@ -286,7 +289,6 @@ export type VendureCart = {
 };
 
 export type Cart = Partial<VendureCart> & {
-  lines: CartItem[];
   checkoutUrl: string;
   totalQuantity: number;
   cost: {

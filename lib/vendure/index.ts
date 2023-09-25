@@ -55,7 +55,7 @@ import { getCartQuery } from './providers/orders/order';
 import { getProductQuery, getProductsQuery } from './providers/products/products';
 
 
-const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `https://readonlydemo.vendure.io/shop-api`;
+const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
 const key = process.env.VENDURE_API_KEY ?? ``;
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
@@ -118,17 +118,20 @@ export async function vendureFetch<T>({
 }
 
 const reshapeCart = (cart: VendureCart): Cart => {
-  const lines = cart?.items?.map((item) => reshapeLineItem(item)) || [];
-  if (!cart.cost?.totalTaxAmount) {
-    cart.cost.totalTaxAmount = {
-      amount: '0.0',
-      currencyCode: 'USD'
-    };
-  }
+  const checkoutUrl = `/checkout`;
+
+  const cost = {
+    subtotalAmount: cart.subTotal,
+    totalAmount: cart.total,
+    totalTaxAmount: cart.totalWithTax,
+  };
 
   return {
     ...cart,
     lines: cart.lines,
+    checkoutUrl,
+    id: cart.id,
+    cost,
   };
 };
 
@@ -144,8 +147,7 @@ const reshapeCollection = (collection: VendureCollection): Collection | undefine
   };
 };
 
-const reshapeCollections = (collections: Collection[]) => {
-  const description = collections.description || collections.metadata?.description?.toString() || '';
+const reshapeCollections = (collections: VendureCollection[]) => {
   const reshapedCollections = [];
 
   for (const collection of collections) {
@@ -161,14 +163,14 @@ const reshapeCollections = (collections: Collection[]) => {
   return reshapedCollections;
 };
 
-const reshapeImages = (images: Asset, productTitle: string) => {
-  const flattened = images;
+const reshapeImages = (images?: Asset[], productTitle?: string): Image[] => {
+  if (!images) return [];
 
-  return flattened.map((image) => {
-    const filename = image.url.match(/.*\/(.*)\..*/)[1];
+  return images.map((image) => {
+    const filename = image.preview.match(/.*\/(.*)\..*/)[1];
     return {
       ...image,
-      altText: image.altText || `${productTitle} - ${filename}`
+      altText: `${productTitle} - ${filename}`
     };
   });
 };
