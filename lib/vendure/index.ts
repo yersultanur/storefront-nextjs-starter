@@ -9,7 +9,6 @@ import {
   Product,
   Collection,
   VendureCollection,
-  Connection,
   VendureCollectionsOperation,
   VendureAddToCartOperation,
   VendureCart,
@@ -19,7 +18,7 @@ import {
   VendureUpdateCartOperation,
   VendureCartOperation,
   VendureCollectionProductsOperation,
-  Edge,
+  Asset,
   Variant,
   ShippingAddress,
   Line,
@@ -119,6 +118,7 @@ export async function vendureFetch<T>({
 }
 
 const reshapeCart = (cart: VendureCart): Cart => {
+  const lines = cart?.items?.map((item) => reshapeLineItem(item)) || [];
   if (!cart.cost?.totalTaxAmount) {
     cart.cost.totalTaxAmount = {
       amount: '0.0',
@@ -128,7 +128,7 @@ const reshapeCart = (cart: VendureCart): Cart => {
 
   return {
     ...cart,
-    lines: cart.lines
+    lines: cart.lines,
   };
 };
 
@@ -160,8 +160,8 @@ const reshapeCollections = (collections: Collection[]) => {
   return reshapedCollections;
 };
 
-const reshapeImages = (images: Connection<Image>, productTitle: string) => {
-  const flattened = removeEdgesAndNodes(images);
+const reshapeImages = (images: Asset, productTitle: string) => {
+  const flattened = images;
 
   return flattened.map((image) => {
     const filename = image.url.match(/.*\/(.*)\..*/)[1];
@@ -182,7 +182,7 @@ const reshapeProduct = (product: Product, filterHiddenProducts: boolean = true) 
   return {
     ...rest,
     images: reshapeImages(images, product.title),
-    variants: removeEdgesAndNodes(variants)
+    variants: variants,
   };
 };
 
@@ -287,7 +287,7 @@ export async function getCollections(): Promise<Collection[]> {
     query: getCollectionsQuery,
     tags: [TAGS.collections]
   });
-  const vendureCollections = removeEdgesAndNodes(res.body?.data?.collections);
+  const vendureCollections = (res.body?.data?.collections);
   const collections = [
     {
       handle: '',
@@ -334,7 +334,7 @@ export async function getCollectionProducts({
     return [];
   }
 
-  return reshapeProducts(removeEdgesAndNodes(res.body.data.collection.products));
+  return reshapeProducts(res.body.data.collection.products);
 }
 
 
@@ -403,7 +403,7 @@ export async function getProducts({
     }
   });
 
-  return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+  return reshapeProducts(res.body.data.products);
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.

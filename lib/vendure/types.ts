@@ -1,13 +1,5 @@
 import { Collection as CollectionGql, Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem } from './generated/graphql';
 
-export type Connection<T> = {
-  edges: Array<Edge<T>>;
-};
-
-export type Edge<T> = {
-  node: T;
-};
-
 export type ProductCollection = Collection & {
   seo?: {
     title?: string;
@@ -27,7 +19,7 @@ export type Money = {
   currencyCode: string;
 };
 
-export type Image = Asset & FeaturedAsset & {
+export type Image = Asset & {
   altText: string;
 };
 
@@ -101,7 +93,7 @@ export type VendureCollection = {
 
 export type VendureCollectionsOperation = {
   data: {
-    collections: Connection<VendureCollection>;
+    collections: VendureCollection;
   };
 };
 
@@ -155,7 +147,7 @@ export type VendureUpdateCartOperation = {
 export type VendureCollectionProductsOperation = {
   data: {
     collection: {
-      products: Connection<VendureProduct>;
+      products: VendureProduct;
     };
   };
   variables: {
@@ -183,7 +175,7 @@ export type VendureCart = {
     totalAmount: Money;
     totalTaxAmount: Money;
   };
-  lines: Connection<CartItem>;
+  lines: CartItem;
   totalQuantity: number;
 };
 
@@ -215,7 +207,7 @@ type FeaturedAsset = {
   altText: string;
 };
 
-type Asset = {
+export type Asset = {
   id: string;
   preview: string;
 };
