@@ -118,7 +118,6 @@ const reshapeCart = (cart: VendureCart): Cart => {
   };
 };
 
-
 const reshapeCollection = (collection: VendureCollection): Collection | undefined => {
   if (!collection) {
     return undefined;
@@ -286,27 +285,27 @@ export async function getCollections(): Promise<Collection[]> {
     tags: [TAGS.collections]
   });
   const vendureCollections = (res.body?.data?.collections);
-  // const collections = [
-  //   {
-  //     handle: '',
-  //     id: ``,
-  //     title: 'All',
-  //     description: 'All products',
-  //     seo: {
-  //       title: 'All',
-  //       description: 'All products'
-  //     },
-  //     path: '/search',
-  //     updatedAt: new Date().toISOString()
-  //   },
-  //   // Filter out the `hidden` collections.
-  //   // Collections that start with `hidden-*` need to be hidden on the search page.
-  //   ...reshapeCollections(vendureCollections).filter(
-  //     (collection) => !collection.handle.startsWith('hidden')
-  //   )
-  // ];
+  const collections = [
+    {
+      handle: '',
+      id: ``,
+      title: 'All',
+      description: 'All products',
+      seo: {
+        title: 'All',
+        description: 'All products'
+      },
+      path: '/search',
+      updatedAt: new Date().toISOString()
+    },
+    // Filter out the `hidden` collections.
+    // Collections that start with `hidden-*` need to be hidden on the search page.
+    ...reshapeCollections(vendureCollections).filter(
+      (collection) => !collection.handle.startsWith('hidden')
+    )
+  ];
 
-  return reshapeCollections(res.body?.data?.collections);
+  return collections;
 }
 
 export async function getCollectionProducts({

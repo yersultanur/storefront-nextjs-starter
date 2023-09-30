@@ -1,23 +1,18 @@
 import gql from 'graphql-tag';
 
 import productFragment from '../../providers/fragments/product';
-import seoFragmentProduct from '../../providers/fragments/seoProduct';
+import seoFragmentCollection from '../fragments/seoCollection';
 
 
 const collectionFragment = /* GraphQL */ `
   fragment collection on Collection {
+    slug
     name
     description
-    productVariants {
-      items {
-        product {
-          ...seoProduct
-        }
-      }
-    }
+    ...seoCollection
     updatedAt
   }
-  ${seoFragmentProduct}
+  ${seoFragmentCollection}
 `;
 
 export const getCollectionsQuery = /* GraphQL */ `
@@ -79,49 +74,6 @@ query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
     }
   }
 }
-`;
-
-gql`
-  query collections {
-    collections {
-      items {
-        id
-        name
-        slug
-        parent {
-          name
-        }
-        featuredAsset {
-          id
-          preview
-        }
-      }
-    }
-  }
-`;
-
-gql`
-  query collection($handle: String, $id: ID) {
-    collection(slug: $handle, id: $id) {
-      id
-      name
-      slug
-      breadcrumbs {
-        id
-        name
-        slug
-      }
-      children {
-        id
-        name
-        slug
-        featuredAsset {
-          id
-          preview
-        }
-      }
-    }
-  }
 `;
 
 
