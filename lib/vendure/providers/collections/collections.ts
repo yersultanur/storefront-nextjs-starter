@@ -41,17 +41,13 @@ export const getCollectionQuery = /* GraphQL */ `
 `;
 
 export const getCollectionProductsQuery = /* GraphQL */ `
- query getCollectionProducts($slug: String, $id: ID) {
-  collection(slug: $slug, id: $id) {
-    productVariants {
-      items {
-        product {
-          ...product
-        }
+  query getCollectionProductsQuery($options: ProductListOptions) {
+    products(options: $options){
+      items{
+      ...product
       }
     }
   }
-}
   ${productFragment}
 `;
 
