@@ -125,11 +125,13 @@ const reshapeCollection = (collection: VendureCollection): Collection | undefine
   }
   const handle = collection.slug
   const title = collection.name
+  const images = reshapeImages(collection.assets)
 
   return {
     ...collection,
     handle,
     title,
+    images,
     path: `/search/${handle}`
   };
 };
@@ -284,26 +286,27 @@ export async function getCollections(): Promise<Collection[]> {
     tags: [TAGS.collections]
   });
   const vendureCollections = (res.body?.data?.collections);
-  const collections = [
-    {
-      handle: '',
-      title: 'All',
-      description: 'All products',
-      seo: {
-        title: 'All',
-        description: 'All products'
-      },
-      path: '/search',
-      updatedAt: new Date().toISOString()
-    },
-    // Filter out the `hidden` collections.
-    // Collections that start with `hidden-*` need to be hidden on the search page.
-    ...reshapeCollections(vendureCollections).filter(
-      (collection) => !collection.handle.startsWith('hidden')
-    )
-  ];
+  // const collections = [
+  //   {
+  //     handle: '',
+  //     id: ``,
+  //     title: 'All',
+  //     description: 'All products',
+  //     seo: {
+  //       title: 'All',
+  //       description: 'All products'
+  //     },
+  //     path: '/search',
+  //     updatedAt: new Date().toISOString()
+  //   },
+  //   // Filter out the `hidden` collections.
+  //   // Collections that start with `hidden-*` need to be hidden on the search page.
+  //   ...reshapeCollections(vendureCollections).filter(
+  //     (collection) => !collection.handle.startsWith('hidden')
+  //   )
+  // ];
 
-  return collections;
+  return reshapeCollections(res.body?.data?.collections);
 }
 
 export async function getCollectionProducts({

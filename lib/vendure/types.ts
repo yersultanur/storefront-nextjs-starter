@@ -1,4 +1,4 @@
-import { Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem, Product as VendureProduct, Asset, Collection as VendureCollection } from './generated/graphql';
+import { Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem, Product as VendureProduct, Asset, Collection as VendureCollection, Node } from './generated/graphql';
 
 export type ProductCollection = Collection & {
   seo?: {
@@ -76,7 +76,15 @@ type Breadcrumb = {
 };
 
 export type Collection = VendureCollection & {
+  seo?: {
+    title?: string;
+    description?: string;
+  };
   path: string;
+  updatedAt: string;
+  images: Asset[];
+  title: string;
+  handle: string;
 };
 
 export type VendureCollectionsOperation = {
