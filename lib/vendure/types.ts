@@ -1,4 +1,4 @@
-import { Collection as CollectionGql, Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem } from './generated/graphql';
+import { Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem, Product as VendureProduct, Asset, Collection as VendureCollection } from './generated/graphql';
 
 export type ProductCollection = Collection & {
   seo?: {
@@ -30,15 +30,6 @@ type Tag = {
   value: string;
 };
 
-export type AppState = {
-  collections: CollectionGql[];
-  VendureCart: Order;
-  showCart: boolean;
-  customer: ActiveCustomer;
-  shippingAddress: ShippingAddress;
-  availableCountries: Country[];
-  addressBook: ShippingAddress[];
-};
 
 export type Product = Omit<VendureProduct, 'variants' | 'images'> & {
   title: string;
@@ -54,17 +45,22 @@ export type Product = Omit<VendureProduct, 'variants' | 'images'> & {
   options: Array<ProductOption>;
 };
 
+export type VendureProductOperation = {
+  data: { product: VendureProduct };
+  variables: {
+    handle: string;
+  };
+};
 
-export type VendureProduct = {
-  id: string;
-  name: string;
-  slug?: string;
-  description: string;
-  collections: Collection[];
-  facetValues: FacetValue[];
-  featuredAsset: FeaturedAsset;
-  assets: Asset[];
-  variants: Variant[];
+export type VendureProductsOperation = {
+  data: {
+    products: VendureProduct;
+  };
+  variables: {
+    query?: string;
+    reverse?: boolean;
+    sortKey?: string;
+  };
 };
 
 export type ProductOption = Omit<VendureProductOption, 'values'> & {
@@ -83,19 +79,12 @@ export type Collection = VendureCollection & {
   path: string;
 };
 
-export type VendureCollection = {
-  handle: string;
-  title: string;
-  description: string;
-  seo: SEO;
-  updatedAt: string;
-};
-
 export type VendureCollectionsOperation = {
   data: {
-    collections: VendureCollection;
+    collections: VendureCollection[];
   };
 };
+
 export type VendureCollectionOperation = {
   data: {
     collection: VendureCollection;
@@ -155,11 +144,11 @@ export type VendureUpdateCartOperation = {
 export type VendureCollectionProductsOperation = {
   data: {
     collection: {
-      products: VendureProduct;
+      products: VendureProduct[];
     };
   };
   variables: {
-    slug: string;
+    handle: string;
     reverse?: boolean;
     sortKey?: string;
   };
@@ -200,14 +189,6 @@ type FeaturedAsset = {
   width: number;
   height: number;
   altText: string;
-};
-
-export type Asset = {
-  id: string;
-  preview: string;
-  width: number;
-  height: number;
-  name: string;
 };
 
 export type Variant = {

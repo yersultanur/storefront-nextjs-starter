@@ -5,39 +5,21 @@ import { revalidateTag } from 'next/cache';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  AppState,
   Product,
   Collection,
-  VendureCollection,
   VendureCollectionsOperation,
   VendureAddToCartOperation,
   VendureCart,
   VendureCreateCartOperation,
-  VendureProduct,
   VendureRemoveFromCartOperation,
   VendureUpdateCartOperation,
   VendureCartOperation,
   VendureCollectionProductsOperation,
   VendureCollectionOperation,
-  Asset,
-  Variant,
-  ShippingAddress,
-  Line,
-  OrderPriceFields,
-  Search,
-  FacetWithValues,
-  Review,
-  ActiveCustomer,
-  Login,
-  RegisterCustomer,
-  EligibleShippingMethods,
-  EligiblePaymentMethods,
-  Country,
-  ActiveCustomerOrders,
-  ActiveCustomerOrder,
-  CurrencyCode,
   Cart,
   Image,
+  VendureProductOperation,
+  VendureProductsOperation,
   Menu
 } from './types';
 import {
@@ -53,6 +35,7 @@ import {
 } from './providers/mutations/cart';
 import { getCartQuery } from './providers/orders/order';
 import { getProductQuery, getProductsQuery } from './providers/products/products';
+import { Product as VendureProduct, Asset, Collection as VendureCollection } from './generated/graphql';
 
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
@@ -140,10 +123,14 @@ const reshapeCollection = (collection: VendureCollection): Collection | undefine
   if (!collection) {
     return undefined;
   }
+  const handle = collection.slug
+  const title = collection.name
 
   return {
     ...collection,
-    path: `/search/${collection.handle}`
+    handle,
+    title,
+    path: `/search/${handle}`
   };
 };
 
@@ -167,7 +154,7 @@ const reshapeImages = (images?: Asset[], productTitle?: string): Image[] => {
   if (!images) return [];
 
   return images.map((image) => {
-    const filename = image.preview.match(/.*\/(.*)\..*/)[1];
+    const filename = image.preview.match(/.*\/(.*)\..*/)![1];
     return {
       ...image,
       altText: `${productTitle} - ${filename}`
@@ -175,17 +162,23 @@ const reshapeImages = (images?: Asset[], productTitle?: string): Image[] => {
   });
 };
 
-const reshapeProduct = (product: Product, filterHiddenProducts: boolean = true) => {
-  if (!product || (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))) {
+const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean = true) => {
+  if (!product || (filterHiddenProducts)) {
     return undefined;
   }
 
-  const { images, variants, ...rest } = product;
+  const { variants, ...rest } = product;
+  const images = product.assets
+  const title = product.name
+  const handle = product.slug
+
 
   return {
     ...rest,
-    images: reshapeImages(images, product.title),
+    images: reshapeImages(images, title),
     variants: variants,
+    handle,
+    title
   };
 };
 

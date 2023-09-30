@@ -1935,7 +1935,7 @@ export type Order = Node & {
   /**
    * The subTotal is the total of all OrderLines in the Order. This figure also includes any Order-level
    * discounts which have been prorated (proportionally distributed) amongst the items of each OrderLine.
-   * To get a total of all OrderLines which does not account for prorated discounts, use the
+   * To getCollectionProductsQuery a total of all OrderLines which does not account for prorated discounts, use the
    * sum of `OrderLine.discountedLinePrice` values.
    */
   subTotal: Scalars['Money']['output'];
@@ -3437,7 +3437,7 @@ export type GetCollectionsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetCollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', items: Array<{ __typename?: 'Collection', name: string, description: string, updatedAt: any, productVariants: { __typename?: 'ProductVariantList', items: Array<{ __typename?: 'ProductVariant', product: { __typename?: 'Product', name: string, description: string } }> } }> } };
 
 export type GetCollectionQueryVariables = Exact<{
-  slug?: InputMaybe<Scalars['String']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
@@ -3445,12 +3445,13 @@ export type GetCollectionQueryVariables = Exact<{
 export type GetCollectionQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', name: string, description: string, updatedAt: any, productVariants: { __typename?: 'ProductVariantList', items: Array<{ __typename?: 'ProductVariant', product: { __typename?: 'Product', name: string, description: string } }> } } | null };
 
 export type GetCollectionProductsQueryVariables = Exact<{
-  slug?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['ID']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetCollectionProductsQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', productVariants: { __typename?: 'ProductVariantList', items: Array<{ __typename?: 'ProductVariant', product: { __typename?: 'Product', id: string, name: string, description: string, updatedAt: any, optionGroups: Array<{ __typename?: 'ProductOptionGroup', options: Array<{ __typename?: 'ProductOption', id: string, name: string, code: string }> }>, variants: Array<{ __typename?: 'ProductVariant', id: string, name: string, price: number, currencyCode: CurrencyCode, options: Array<{ __typename?: 'ProductOption', name: string, code: string }> }>, featuredAsset?: { __typename?: 'Asset', id: string, preview: string, name: string, width: number, height: number } | null, assets: Array<{ __typename?: 'Asset', id: string, preview: string, name: string, width: number, height: number }> } }> } } | null };
+export type GetCollectionProductsQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', id: string, name: string, description: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null } | null, search: { __typename?: 'SearchResponse', totalItems: number, items: Array<{ __typename?: 'SearchResult', productName: string, slug: string, currencyCode: CurrencyCode, productAsset?: { __typename?: 'SearchResultAsset', id: string, preview: string } | null, priceWithTax: { __typename?: 'PriceRange', min: number, max: number } | { __typename?: 'SinglePrice', value: number } }> } };
 
 export type CollectionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3458,7 +3459,7 @@ export type CollectionsQueryVariables = Exact<{ [key: string]: never; }>;
 export type CollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', items: Array<{ __typename?: 'Collection', id: string, name: string, slug: string, parent?: { __typename?: 'Collection', name: string } | null, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null }> } };
 
 export type CollectionQueryVariables = Exact<{
-  slug?: InputMaybe<Scalars['String']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
@@ -3561,7 +3562,7 @@ export type OrderByCodeQueryVariables = Exact<{
 export type OrderByCodeQuery = { __typename?: 'Query', orderByCode?: { __typename: 'Order', id: string, code: string, active: boolean, createdAt: any, state: string, currencyCode: CurrencyCode, totalQuantity: number, subTotal: number, subTotalWithTax: number, shippingWithTax: number, totalWithTax: number, taxSummary: Array<{ __typename?: 'OrderTaxSummary', description: string, taxRate: number, taxTotal: number }>, customer?: { __typename?: 'Customer', id: string, firstName: string, lastName: string, emailAddress: string } | null, shippingAddress?: { __typename?: 'OrderAddress', fullName?: string | null, streetLine1?: string | null, streetLine2?: string | null, company?: string | null, city?: string | null, province?: string | null, postalCode?: string | null, countryCode?: string | null, phoneNumber?: string | null } | null, shippingLines: Array<{ __typename?: 'ShippingLine', priceWithTax: number, shippingMethod: { __typename?: 'ShippingMethod', id: string, name: string } }>, lines: Array<{ __typename?: 'OrderLine', id: string, unitPriceWithTax: number, linePriceWithTax: number, quantity: number, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null, productVariant: { __typename?: 'ProductVariant', id: string, name: string, price: number, product: { __typename?: 'Product', id: string, slug: string } } }>, payments?: Array<{ __typename?: 'Payment', id: string, state: string, method: string, amount: number, metadata?: any | null }> | null } | null };
 
 export type GetProductQueryVariables = Exact<{
-  slug?: InputMaybe<Scalars['String']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
@@ -4031,25 +4032,48 @@ export const GetCollectionsDocument = gql`
 }
     ${CollectionFragmentDoc}`;
 export const GetCollectionDocument = gql`
-    query getCollection($slug: String, $id: ID) {
-  collection(slug: $slug, id: $id) {
+    query getCollection($handle: String, $id: ID) {
+  collection(slug: $handle, id: $id) {
     ...collection
   }
 }
     ${CollectionFragmentDoc}`;
 export const GetCollectionProductsDocument = gql`
-    query getCollectionProducts($slug: String, $id: ID) {
-  collection(slug: $slug, id: $id) {
-    productVariants {
-      items {
-        product {
-          ...product
+    query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
+  collection(slug: $handle) {
+    id
+    name
+    description
+    featuredAsset {
+      id
+      preview
+    }
+  }
+  search(
+    input: {collectionSlug: $handle, groupByProduct: true, skip: $skip, take: $take}
+  ) {
+    totalItems
+    items {
+      productName
+      slug
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
         }
       }
+      currencyCode
     }
   }
 }
-    ${ProductFragmentDoc}`;
+    `;
 export const CollectionsDocument = gql`
     query collections {
   collections {
@@ -4069,8 +4093,8 @@ export const CollectionsDocument = gql`
 }
     `;
 export const CollectionDocument = gql`
-    query collection($slug: String, $id: ID) {
-  collection(slug: $slug, id: $id) {
+    query collection($handle: String, $id: ID) {
+  collection(slug: $handle, id: $id) {
     id
     name
     slug
@@ -4284,8 +4308,8 @@ export const OrderByCodeDocument = gql`
 }
     ${OrderDetailFragmentDoc}`;
 export const GetProductDocument = gql`
-    query getProduct($slug: String, $id: ID) {
-  product(slug: $slug, id: $id) {
+    query getProduct($handle: String, $id: ID) {
+  product(slug: $handle, id: $id) {
     ...product
   }
 }
@@ -4407,7 +4431,7 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     getCollection(variables?: GetCollectionQueryVariables, options?: C): Promise<GetCollectionQuery> {
       return requester<GetCollectionQuery, GetCollectionQueryVariables>(GetCollectionDocument, variables, options) as Promise<GetCollectionQuery>;
     },
-    getCollectionProducts(variables?: GetCollectionProductsQueryVariables, options?: C): Promise<GetCollectionProductsQuery> {
+    GetCollectionProducts(variables?: GetCollectionProductsQueryVariables, options?: C): Promise<GetCollectionProductsQuery> {
       return requester<GetCollectionProductsQuery, GetCollectionProductsQueryVariables>(GetCollectionProductsDocument, variables, options) as Promise<GetCollectionProductsQuery>;
     },
     collections(variables?: CollectionsQueryVariables, options?: C): Promise<CollectionsQuery> {
