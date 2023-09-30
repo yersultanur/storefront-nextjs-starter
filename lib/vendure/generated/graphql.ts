@@ -1935,7 +1935,7 @@ export type Order = Node & {
   /**
    * The subTotal is the total of all OrderLines in the Order. This figure also includes any Order-level
    * discounts which have been prorated (proportionally distributed) amongst the items of each OrderLine.
-   * To getCollectionProductsQuery a total of all OrderLines which does not account for prorated discounts, use the
+   * To get a total of all OrderLines which does not account for prorated discounts, use the
    * sum of `OrderLine.discountedLinePrice` values.
    */
   subTotal: Scalars['Money']['output'];
@@ -3429,12 +3429,12 @@ export type GenerateBraintreeClientTokenQueryVariables = Exact<{ [key: string]: 
 
 export type GenerateBraintreeClientTokenQuery = { __typename?: 'Query', generateBraintreeClientToken?: string | null };
 
-export type CollectionFragment = { __typename?: 'Collection', name: string, description: string, updatedAt: any, productVariants: { __typename?: 'ProductVariantList', items: Array<{ __typename?: 'ProductVariant', product: { __typename?: 'Product', name: string, description: string } }> } };
+export type CollectionFragment = { __typename?: 'Collection', slug: string, name: string, description: string, updatedAt: any };
 
 export type GetCollectionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', items: Array<{ __typename?: 'Collection', name: string, description: string, updatedAt: any, productVariants: { __typename?: 'ProductVariantList', items: Array<{ __typename?: 'ProductVariant', product: { __typename?: 'Product', name: string, description: string } }> } }> } };
+export type GetCollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', items: Array<{ __typename?: 'Collection', slug: string, name: string, description: string, updatedAt: any }> } };
 
 export type GetCollectionQueryVariables = Exact<{
   handle?: InputMaybe<Scalars['String']['input']>;
@@ -3442,7 +3442,7 @@ export type GetCollectionQueryVariables = Exact<{
 }>;
 
 
-export type GetCollectionQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', name: string, description: string, updatedAt: any, productVariants: { __typename?: 'ProductVariantList', items: Array<{ __typename?: 'ProductVariant', product: { __typename?: 'Product', name: string, description: string } }> } } | null };
+export type GetCollectionQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', slug: string, name: string, description: string, updatedAt: any } | null };
 
 export type GetCollectionProductsQueryVariables = Exact<{
   handle?: InputMaybe<Scalars['String']['input']>;
@@ -3452,19 +3452,6 @@ export type GetCollectionProductsQueryVariables = Exact<{
 
 
 export type GetCollectionProductsQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', id: string, name: string, description: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null } | null, search: { __typename?: 'SearchResponse', totalItems: number, items: Array<{ __typename?: 'SearchResult', productName: string, slug: string, currencyCode: CurrencyCode, productAsset?: { __typename?: 'SearchResultAsset', id: string, preview: string } | null, priceWithTax: { __typename?: 'PriceRange', min: number, max: number } | { __typename?: 'SinglePrice', value: number } }> } };
-
-export type CollectionsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type CollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', items: Array<{ __typename?: 'Collection', id: string, name: string, slug: string, parent?: { __typename?: 'Collection', name: string } | null, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null }> } };
-
-export type CollectionQueryVariables = Exact<{
-  handle?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type CollectionQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', id: string, name: string, slug: string, breadcrumbs: Array<{ __typename?: 'CollectionBreadcrumb', id: string, name: string, slug: string }>, children?: Array<{ __typename?: 'Collection', id: string, name: string, slug: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null }> | null } | null };
 
 export type ActiveCustomerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3592,26 +3579,21 @@ export type SearchFacetValuesQueryVariables = Exact<{
 
 export type SearchFacetValuesQuery = { __typename?: 'Query', search: { __typename?: 'SearchResponse', totalItems: number, facetValues: Array<{ __typename?: 'FacetValueResult', count: number, facetValue: { __typename?: 'FacetValue', id: string, name: string, facet: { __typename?: 'Facet', id: string, name: string } } }> } };
 
-export const SeoProductFragmentDoc = gql`
-    fragment seoProduct on Product {
-  name
+export const SeoCollectionFragmentDoc = gql`
+    fragment seoCollection on Collection {
   description
+  name
 }
     `;
 export const CollectionFragmentDoc = gql`
     fragment collection on Collection {
+  slug
   name
   description
-  productVariants {
-    items {
-      product {
-        ...seoProduct
-      }
-    }
-  }
+  ...seoCollection
   updatedAt
 }
-    ${SeoProductFragmentDoc}`;
+    ${SeoCollectionFragmentDoc}`;
 export const CartFragmentDoc = gql`
     fragment cart on Order {
   __typename
@@ -3692,6 +3674,12 @@ export const ImageFragmentDoc = gql`
   height
 }
     `;
+export const SeoProductFragmentDoc = gql`
+    fragment seoProduct on Product {
+  name
+  description
+}
+    `;
 export const ProductFragmentDoc = gql`
     fragment product on Product {
   id
@@ -3725,12 +3713,6 @@ export const ProductFragmentDoc = gql`
 }
     ${ImageFragmentDoc}
 ${SeoProductFragmentDoc}`;
-export const SeoCollectionFragmentDoc = gql`
-    fragment seoCollection on Collection {
-  description
-  name
-}
-    `;
 export const OrderDetailFragmentDoc = gql`
     fragment OrderDetail on Order {
   __typename
@@ -4074,47 +4056,6 @@ export const GetCollectionProductsDocument = gql`
   }
 }
     `;
-export const CollectionsDocument = gql`
-    query collections {
-  collections {
-    items {
-      id
-      name
-      slug
-      parent {
-        name
-      }
-      featuredAsset {
-        id
-        preview
-      }
-    }
-  }
-}
-    `;
-export const CollectionDocument = gql`
-    query collection($handle: String, $id: ID) {
-  collection(slug: $handle, id: $id) {
-    id
-    name
-    slug
-    breadcrumbs {
-      id
-      name
-      slug
-    }
-    children {
-      id
-      name
-      slug
-      featuredAsset {
-        id
-        preview
-      }
-    }
-  }
-}
-    `;
 export const ActiveCustomerDocument = gql`
     query activeCustomer {
   activeCustomer {
@@ -4433,12 +4374,6 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetCollectionProducts(variables?: GetCollectionProductsQueryVariables, options?: C): Promise<GetCollectionProductsQuery> {
       return requester<GetCollectionProductsQuery, GetCollectionProductsQueryVariables>(GetCollectionProductsDocument, variables, options) as Promise<GetCollectionProductsQuery>;
-    },
-    collections(variables?: CollectionsQueryVariables, options?: C): Promise<CollectionsQuery> {
-      return requester<CollectionsQuery, CollectionsQueryVariables>(CollectionsDocument, variables, options) as Promise<CollectionsQuery>;
-    },
-    collection(variables?: CollectionQueryVariables, options?: C): Promise<CollectionQuery> {
-      return requester<CollectionQuery, CollectionQueryVariables>(CollectionDocument, variables, options) as Promise<CollectionQuery>;
     },
     activeCustomer(variables?: ActiveCustomerQueryVariables, options?: C): Promise<ActiveCustomerQuery> {
       return requester<ActiveCustomerQuery, ActiveCustomerQueryVariables>(ActiveCustomerDocument, variables, options) as Promise<ActiveCustomerQuery>;
