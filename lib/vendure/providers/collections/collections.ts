@@ -32,8 +32,8 @@ export const getCollectionsQuery = /* GraphQL */ `
 `;
 
 export const getCollectionQuery = /* GraphQL */ `
-  query getCollection($slug: String, $id: ID){
-    collection(slug: $slug, id: $id) {
+  query getCollection($handle: String, $id: ID){
+    collection(slug: $handle, id: $id) {
       ...collection
     }
   }
@@ -41,14 +41,44 @@ export const getCollectionQuery = /* GraphQL */ `
 `;
 
 export const getCollectionProductsQuery = /* GraphQL */ `
-  query getCollectionProductsQuery($options: ProductListOptions) {
-    products(options: $options){
-      items{
-      ...product
-      }
+query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
+  collection(slug: $handle) {
+    id
+    name
+    description
+    featuredAsset {
+      id
+      preview
     }
   }
-  ${productFragment}
+  search(
+    input: {
+      collectionSlug: $handle,
+      groupByProduct: true,
+      skip: $skip,
+      take: $take }
+  ) {
+    totalItems
+    items {
+      productName
+      slug
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+    }
+  }
+}
 `;
 
 gql`
@@ -71,8 +101,8 @@ gql`
 `;
 
 gql`
-  query collection($slug: String, $id: ID) {
-    collection(slug: $slug, id: $id) {
+  query collection($handle: String, $id: ID) {
+    collection(slug: $handle, id: $id) {
       id
       name
       slug

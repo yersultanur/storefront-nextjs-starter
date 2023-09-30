@@ -159,7 +159,7 @@ export type VendureCollectionProductsOperation = {
     };
   };
   variables: {
-    handle: string;
+    slug: string;
     reverse?: boolean;
     sortKey?: string;
   };
