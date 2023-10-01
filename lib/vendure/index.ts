@@ -20,6 +20,8 @@ import {
   Image,
   VendureProductOperation,
   VendureProductsOperation,
+  VendureImage,
+  VendureCollection,
   Menu
 } from './types';
 import {
@@ -35,7 +37,7 @@ import {
 } from './providers/mutations/cart';
 import { getCartQuery } from './providers/orders/order';
 import { getProductQuery, getProductsQuery } from './providers/products/products';
-import { Product as VendureProduct, Asset, Collection as VendureCollection } from './generated/graphql';
+import { Product as VendureProduct } from './generated/graphql';
 
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
@@ -124,13 +126,11 @@ const reshapeCollection = (collection: VendureCollection): Collection | undefine
   }
   const handle = collection.slug
   const title = collection.name
-  const images = reshapeImages(collection.assets)
 
   return {
     ...collection,
     handle,
     title,
-    images,
     path: `/search/${handle}`
   };
 };
@@ -151,7 +151,7 @@ const reshapeCollections = (collections: VendureCollection[]) => {
   return reshapedCollections;
 };
 
-const reshapeImages = (images?: Asset[], productTitle?: string): Image[] => {
+const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] => {
   if (!images) return [];
 
   return images.map((image) => {
@@ -288,7 +288,8 @@ export async function getCollections(): Promise<Collection[]> {
   const collections = [
     {
       handle: '',
-      id: ``,
+      name: 'All',
+      slug: 'All',
       title: 'All',
       description: 'All products',
       seo: {
