@@ -1,4 +1,4 @@
-import { Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem, Product as VendureProduct } from './generated/graphql';
+import { Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem } from './generated/graphql';
 
 export type Maybe<T> = T | null;
 
@@ -76,12 +76,32 @@ export type Product = Omit<VendureProduct, 'variants' | 'images'> & {
   images: VendureImage[];
   priceRange: {
     maxVariantPrice: Money;
+    minVariantPrice:Money;
   };
   featuredImage: FeaturedAsset;
   handle?: string | null;
   descriptionHtml: string;
   availableForSale: boolean;
   options: Array<ProductOption>;
+  seo: SEO
+  tags: string[];
+};
+
+
+export type VendureProduct = {
+  assets: Array<VendureImage>;
+  collections: Array<VendureCollection>;
+  createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
+  description: Scalars['String']['output'];
+  facetValues: Array<FacetValue>;
+  featuredAsset?: Maybe<VendureImage>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  slug: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  /** Returns a paginated, sortable, filterable list of ProductVariants */
+  variants: Array<ProductVariant>;
 };
 
 export type VendureProductOperation = {

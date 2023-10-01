@@ -22,6 +22,7 @@ import {
   VendureProductsOperation,
   VendureImage,
   VendureCollection,
+  VendureProduct,
   Menu
 } from './types';
 import {
@@ -37,7 +38,6 @@ import {
 } from './providers/mutations/cart';
 import { getCartQuery } from './providers/orders/order';
 import { getProductQuery, getProductsQuery } from './providers/products/products';
-import { Product as VendureProduct } from './generated/graphql';
 
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
@@ -154,10 +154,13 @@ const reshapeCollections = (collections: VendureCollection[]) => {
 const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] => {
   if (!images) return [];
 
+
   return images.map((image) => {
+    const url = image.preview
     const filename = image.preview.match(/.*\/(.*)\..*/)![1];
     return {
       ...image,
+      url,
       altText: `${productTitle} - ${filename}`
     };
   });
@@ -169,14 +172,14 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
   }
 
   const { variants, ...rest } = product;
-  const images = product.assets
   const title = product.name
   const handle = product.slug
+  const images = reshapeImages(product.assets, title);
 
 
   return {
     ...rest,
-    images: reshapeImages(images, title),
+    images,
     variants: variants,
     handle,
     title
