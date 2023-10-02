@@ -23,7 +23,10 @@ import {
   VendureImage,
   VendureCollection,
   VendureProduct,
-  Menu
+  Menu,
+  SearchProductVendure,
+  SearchProductAsset,
+  ImageSearch
 } from './types';
 import {
   getCollectionProductsQuery,
@@ -38,6 +41,7 @@ import {
 } from './providers/mutations/cart';
 import { getCartQuery } from './providers/orders/order';
 import { getProductQuery, getProductsQuery } from './providers/products/products';
+import Search from 'components/layout/navbar/search';
 
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
@@ -120,10 +124,8 @@ const reshapeCart = (cart: VendureCart): Cart => {
   };
 };
 
-const reshapeCollection = (collection: VendureCollection): Collection | undefined => {
-  if (!collection) {
-    return undefined;
-  }
+const reshapeCollection = (collection: VendureCollection): Collection => {
+
   const handle = collection.slug
   const title = collection.name
 
@@ -166,6 +168,21 @@ const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] 
   });
 };
 
+const reshapeProductImages = (images?: SearchProductAsset[], productTitle?: string): ImageSearch[] => {
+  if (!images) return [];
+
+
+  return images.map((image) => {
+    const url = image.preview
+    const filename = image.preview.match(/.*\/(.*)\..*/)![1];
+    return {
+      ...image,
+      url,
+      altText: `${productTitle} - ${filename}`
+    };
+  });
+};
+
 const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean = true) => {
   if (!product || (filterHiddenProducts)) {
     return undefined;
@@ -181,6 +198,20 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
     ...rest,
     images,
     variants: variants,
+    handle,
+    title
+  };
+};
+
+const reshapeCollectionProducts = (product: SearchProductVendure) => {
+
+  const title = product.items.productName
+  const handle = product.items.slug
+  const images = reshapeProductImages(product.items.productAsset, title);
+
+
+  return {
+    images,
     handle,
     title
   };
@@ -292,7 +323,7 @@ export async function getCollections(): Promise<Collection[]> {
     {
       handle: '',
       name: 'All',
-      slug: 'All',
+      slug: '',
       title: 'All',
       description: 'All products',
       seo: {
@@ -335,8 +366,9 @@ export async function getCollectionProducts({
     console.log(`No collection found for \`${collection}\``);
     return [];
   }
+  const product = res.body.data.search
 
-  return reshapeProducts(res.body.data.collection.products);
+  return reshapeCollectionProducts(product);
 }
 
 

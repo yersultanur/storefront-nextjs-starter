@@ -32,6 +32,15 @@ export type Image = VendureImage & {
   altText: string;
 };
 
+export type ImageSearch = SearchProductAsset & {
+  altText: string;
+};
+
+export type SearchProductAsset = {
+  id: Scalars['ID']['output'];
+  preview: Scalars['String']['output'];
+};
+
 export type VendureImage = {
   createdAt: Scalars['DateTime']['output'];
   height: Scalars['Int']['output'];
@@ -70,21 +79,21 @@ type Tag = {
 };
 
 
-export type Product = Omit<VendureProduct, 'variants' | 'images'> & {
+export type Product = Partial<Omit<VendureProduct, 'variants' | 'assets' | 'images'>> & {
   title: string;
   variants: ProductVariant[];
-  images: VendureImage[];
+  images?: VendureImage[];
   priceRange: {
     maxVariantPrice: Money;
-    minVariantPrice:Money;
+    minVariantPrice: Money;
   };
   featuredImage: FeaturedAsset;
   handle?: string | null;
   descriptionHtml: string;
   availableForSale: boolean;
   options: Array<ProductOption>;
-  seo: SEO
-  tags: string[];
+  seo?: SEO
+  tags: Array<string>;
 };
 
 
@@ -200,9 +209,8 @@ export type VendureUpdateCartOperation = {
 
 export type VendureCollectionProductsOperation = {
   data: {
-    collection: {
-      products: VendureProduct[];
-    };
+    collection: VendureCollection[];
+    search: SearchProductVendure
   };
   variables: {
     handle: string;
@@ -222,8 +230,8 @@ export type VendureCartOperation = {
 };
 
 export type SEO = {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
 };
 
 type Facet = {
@@ -378,9 +386,20 @@ type Item = {
   productId: string;
   productName: string;
   slug: string;
-  productAsset: ProductAsset;
+  productAsset: ProductAsset[];
   currencyCode: CurrencyCode;
-  priceWithTax: PriceWithTax;
+  price: Price,
+};
+
+export type Price = PriceRange | SinglePrice;
+
+export type PriceRange = {
+  max: Scalars['Money']['output'];
+  min: Scalars['Money']['output'];
+};
+
+export type SinglePrice = {
+  value: Scalars['Money']['output'];
 };
 
 type FilterFacetValueDetail = {
@@ -394,9 +413,8 @@ type FilterFacetValue = {
   facetValue: FilterFacetValueDetail;
 };
 
-export type Search = {
-  totalItems: number;
-  items: Item[];
+export type SearchProductVendure = {
+  items: Item;
   facetValues: FilterFacetValue[];
 };
 
