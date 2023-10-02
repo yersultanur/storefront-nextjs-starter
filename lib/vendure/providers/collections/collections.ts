@@ -61,7 +61,7 @@ query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
         id
         preview
       }
-      priceWithTax {
+      price {
         ... on SinglePrice {
           value
         }
