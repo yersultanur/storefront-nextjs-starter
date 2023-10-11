@@ -57,17 +57,17 @@ export type Collection = VendureCollection & {
     description?: string;
   };
   path: string;
-  title: string;
-  handle: string;
+  title?: string;
+  handle?: string;
 };
 
 export type VendureCollection = {
   children?: Maybe<Array<VendureCollection>>;
   description: Scalars['String']['output'];
   featuredAsset?: Maybe<VendureImage>;
-  name: Scalars['String']['output'];
+  name?: Scalars['String']['output'];
   parent?: Maybe<VendureCollection>;
-  slug: Scalars['String']['output'];
+  slug?: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
 
