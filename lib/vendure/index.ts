@@ -126,11 +126,20 @@ const reshapeCart = (cart: VendureCart): Cart => {
 
 const reshapeCollection = (collection: VendureCollection): Collection => {
 
-  const handle = collection.slug
+  const handle = collection?.slug
   const title = collection.name
-
+  const description = collection.description
+  const seo = {
+    title: collection.name || '',
+    description: collection.description || ''
+  };
+  const updatedAt = collection.updatedAt
+  
   return {
     ...collection,
+    description,
+    updatedAt,
+    seo,
     handle,
     title,
     path: `/search/${handle}`
@@ -329,8 +338,6 @@ export async function getCollections(): Promise<Collection[]> {
   const collections = [
     {
       handle: '',
-      name: 'All',
-      slug: '',
       title: 'All',
       description: 'All products',
       seo: {
@@ -343,7 +350,7 @@ export async function getCollections(): Promise<Collection[]> {
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(vendureCollections).filter(
-      (collection) => !collection.handle.startsWith('hidden')
+      (collection) => !collection?.handle?.startsWith('hidden')
     )
   ];
 
