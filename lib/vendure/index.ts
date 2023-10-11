@@ -26,7 +26,8 @@ import {
   Menu,
   SearchProductVendure,
   SearchProductAsset,
-  ImageSearch
+  ImageSearch,
+  Items
 } from './types';
 import {
   getCollectionProductsQuery,
@@ -105,6 +106,10 @@ export async function vendureFetch<T>({
     };
   }
 }
+
+const removeItems = (array: Items<any>) => {
+  return array.items.map((item) => item);
+};
 
 const reshapeCart = (cart: VendureCart): Cart => {
   const checkoutUrl = `/checkout`;
@@ -334,7 +339,7 @@ export async function getCollections(): Promise<Collection[]> {
     query: getCollectionsQuery,
     tags: [TAGS.collections]
   });
-  const vendureCollections = (res.body?.data?.collections);
+  const vendureCollections = removeItems(res.body?.data?.collections);
   const collections = [
     {
       handle: '',

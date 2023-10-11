@@ -2,6 +2,10 @@ import { Order, ProductOption as VendureProductOption, ProductVariant as Vendure
 
 export type Maybe<T> = T | null;
 
+export type Items<T> = {
+  items: Array<T>;
+};
+
 export type Scalars = {
   ID: { input: string; output: string; }
   String: { input: string; output: string; }
@@ -147,7 +151,7 @@ type Breadcrumb = {
 
 export type VendureCollectionsOperation = {
   data: {
-    collections: VendureCollection[];
+      collections:  Items<VendureCollection>;
   };
 };
 
