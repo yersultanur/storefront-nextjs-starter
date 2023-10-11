@@ -1,7 +1,7 @@
 import cartFragment from '../fragments/cart';
 
 export const addToCartMutation = /* GraphQL */ `
-mutation addItemToOrder($productVariantId: ID!, $quantity: Int!) {
+mutation addToCart($productVariantId: ID!, $quantity: Int!) {
   addItemToOrder(productVariantId: $productVariantId, quantity: $quantity) {
     ...cart
     ... on ErrorResult {
