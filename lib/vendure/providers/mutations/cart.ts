@@ -14,7 +14,7 @@ mutation addToCart($productVariantId: ID!, $quantity: Int!) {
 `;
 
 export const createCartMutation = /* GraphQL */ `
-mutation addItemToOrder($productVariantId: ID!, $quantity: Int!) {
+mutation createCart($productVariantId: ID!, $quantity: Int!) {
   addItemToOrder(productVariantId: $productVariantId, quantity: $quantity) {
     ...cart
     ... on ErrorResult {
@@ -27,7 +27,7 @@ mutation addItemToOrder($productVariantId: ID!, $quantity: Int!) {
 `;
 
 export const editCartItemsMutation = /* GraphQL */ `
-mutation adjustOrderLine($orderLineId: ID!, $quantity: Int!) {
+mutation editCartItems($orderLineId: ID!, $quantity: Int!) {
   adjustOrderLine(orderLineId: $orderLineId, quantity: $quantity) {
     ...cart
     ... on ErrorResult {
@@ -40,7 +40,7 @@ mutation adjustOrderLine($orderLineId: ID!, $quantity: Int!) {
 `;
 
 export const removeFromCartMutation = /* GraphQL */ `
-mutation removeOrderLine($orderLineId: ID!) {
+mutation removeFromCart($orderLineId: ID!) {
   removeOrderLine(orderLineId: $orderLineId) {
     ...cart
     ... on ErrorResult {
