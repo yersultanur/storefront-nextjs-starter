@@ -3451,7 +3451,7 @@ export type GetCollectionProductsQueryVariables = Exact<{
 }>;
 
 
-export type GetCollectionProductsQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', id: string, name: string, description: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null } | null, search: { __typename?: 'SearchResponse', totalItems: number, items: Array<{ __typename?: 'SearchResult', productName: string, slug: string, currencyCode: CurrencyCode, productAsset?: { __typename?: 'SearchResultAsset', id: string, preview: string } | null, price: { __typename?: 'PriceRange', min: number, max: number } | { __typename?: 'SinglePrice', value: number } }> } };
+export type GetCollectionProductsQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', id: string, name: string, description: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null } | null, search: { __typename?: 'SearchResponse', items: Array<{ __typename?: 'SearchResult', productName: string, slug: string, currencyCode: CurrencyCode, productAsset?: { __typename?: 'SearchResultAsset', id: string, preview: string } | null, price: { __typename?: 'PriceRange', min: number, max: number } | { __typename?: 'SinglePrice', value: number } }> } };
 
 export type ActiveCustomerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4034,7 +4034,6 @@ export const GetCollectionProductsDocument = gql`
   search(
     input: {collectionSlug: $handle, groupByProduct: true, skip: $skip, take: $take}
   ) {
-    totalItems
     items {
       productName
       slug

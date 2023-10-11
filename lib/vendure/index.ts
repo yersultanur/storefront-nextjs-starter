@@ -204,10 +204,17 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
 };
 
 const reshapeCollectionProducts = (product: SearchProductVendure) => {
+  let amount = '0';
 
   const title = product.items.productName
   const handle = product.items.slug
   const images = reshapeProductImages(product.items.productAsset, title);
+  const priceRange = {
+    maxVariantPrice: {
+      amount,
+      currencyCode: product.items.currencyCode?.toUpperCase() ?? ''
+    }
+  };
 
 
   return {

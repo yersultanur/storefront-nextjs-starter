@@ -53,7 +53,6 @@ query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
       skip: $skip,
       take: $take }
   ) {
-    totalItems
     items {
       productName
       slug
