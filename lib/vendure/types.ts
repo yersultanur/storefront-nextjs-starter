@@ -226,7 +226,7 @@ export type VendureCollectionProductsOperation = {
 
 export type VendureCartOperation = {
   data: {
-    cart: VendureCart;
+    order: VendureCart;
   };
   variables: {
     cartId: string;

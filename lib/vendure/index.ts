@@ -315,11 +315,11 @@ export async function getCart(cartId: string): Promise<Cart | undefined> {
   });
 
   // Old carts becomes `null` when you checkout.
-  if (!res.body.data.cart) {
+  if (!res.body.data.order) {
     return undefined;
   }
 
-  return reshapeCart(res.body.data.cart);
+  return reshapeCart(res.body.data.order);
 }
 
 export async function getCollection(handle: string): Promise<Collection | undefined> {
