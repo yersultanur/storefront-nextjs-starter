@@ -15,7 +15,7 @@ export async function addItem(prevState: any, selectedVariantId: string | undefi
 
   if (!cartId || !cart) {
     cart = await createCart();
-    cartId = cart.id;
+    cartId = cart.id!;
     cookies().set('cartId', cartId);
   }
 

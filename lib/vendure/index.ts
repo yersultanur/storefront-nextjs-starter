@@ -124,7 +124,6 @@ const reshapeCart = (cart: VendureCart): Cart => {
     ...cart,
     lines: cart.lines,
     checkoutUrl,
-    id: cart.id,
     cost,
   };
 };
@@ -260,12 +259,14 @@ export async function createCart(): Promise<Cart> {
     cache: 'no-store'
   });
 
-  return reshapeCart(res.body.data.cartCreate.cart);
+  const cart = res.body.data.addItemToOrder.cart
+
+  return reshapeCart(cart);
 }
 
 export async function addToCart(
   cartId: string,
-  lines: { variantId: string; quantity: number }[]
+  lines: { merchandiseId: string; quantity: number }[]
 ): Promise<Cart> {
   const res = await vendureFetch<VendureAddToCartOperation>({
     query: addToCartMutation,
@@ -275,7 +276,7 @@ export async function addToCart(
     },
     cache: 'no-store'
   });
-  return reshapeCart(res.body.data.cartLinesAdd.cart);
+  return reshapeCart(res.body.data.addItemToOrder.cart);
 }
 
 export async function removeFromCart(cartId: string, lineIds: string[]): Promise<Cart> {
@@ -311,15 +312,16 @@ export async function getCart(cartId: string): Promise<Cart | undefined> {
   const res = await vendureFetch<VendureCartOperation>({
     query: getCartQuery,
     variables: { cartId },
+    tags: [TAGS.cart],
     cache: 'no-store'
   });
 
   // Old carts becomes `null` when you checkout.
-  if (!res.body.data.order) {
+  if (!res.body.data.cart) {
     return undefined;
   }
 
-  return reshapeCart(res.body.data.order);
+  return reshapeCart(res.body.data.cart);
 }
 
 export async function getCollection(handle: string): Promise<Collection | undefined> {

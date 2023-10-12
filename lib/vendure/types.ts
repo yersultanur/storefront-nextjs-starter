@@ -166,7 +166,7 @@ export type VendureCollectionOperation = {
 
 export type VendureAddToCartOperation = {
   data: {
-    cartLinesAdd: {
+    addItemToOrder: {
       cart: VendureCart;
     };
   };
@@ -180,7 +180,7 @@ export type VendureAddToCartOperation = {
 };
 
 export type VendureCreateCartOperation = {
-  data: { cartCreate: { cart: VendureCart } };
+  data: { addItemToOrder: { cart: VendureCart } };
 };
 
 export type VendureRemoveFromCartOperation = {
@@ -226,7 +226,7 @@ export type VendureCollectionProductsOperation = {
 
 export type VendureCartOperation = {
   data: {
-    order: VendureCart;
+    cart: VendureCart;
   };
   variables: {
     cartId: string;
