@@ -11,19 +11,10 @@ module.exports = {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cdn.shopify.com',
-        pathname: '/s/files/**'
+        protocol: 'http',
+        hostname: 'localhost:3000/assets',
+        pathname: '/**'
       }
     ]
   },
-  async redirects() {
-    return [
-      {
-        source: '/password',
-        destination: '/',
-        permanent: true
-      }
-    ];
-  }
 };

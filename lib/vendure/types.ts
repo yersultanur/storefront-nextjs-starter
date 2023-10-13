@@ -299,13 +299,11 @@ export type ProductVariant = VendureProductVariant & {
   name: string;
   product: Product;
   availableForSale: boolean;
-  selectedOptions: SelectedOption[];
+  selectedOptions: {
+    name: string;
+    value: string;
+  }[];
   price: Money;
-};
-
-export type SelectedOption = {
-  name: string;
-  value: string;
 };
 
 export type Line = {
@@ -334,11 +332,12 @@ export type VendureCart = {
   customer?: any;
   shippingAddress: ShippingAddress;
   shippingLines: ShippingLine[];
-  lines: Line[];
+  // lines: Line[];
   errorCode?: string;
 };
 
 export type Cart = Partial<VendureCart> & {
+  lines: CartItem[];
   checkoutUrl: string;
   totalQuantity: number;
   cost: {
