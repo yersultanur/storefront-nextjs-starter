@@ -46,7 +46,7 @@ import Search from 'components/layout/navbar/search';
 
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
-const key = process.env.VENDURE_API_KEY ?? ``;
+const key = process.env.VENDURE_API_KEY ?? `auth_token`;
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
 
@@ -68,7 +68,7 @@ export async function vendureFetch<T>({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'vendure-token': key,
+        'authorization': `Bearer ${key}`,
         ...headers
       },
       credentials: 'include',
@@ -467,12 +467,12 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
   // otherwise it will continue to retry the request.
   const collectionWebhooks = ['collections/create', 'collections/delete', 'collections/update'];
   const productWebhooks = ['products/create', 'products/delete', 'products/update'];
-  const topic = headers().get('x-shopify-topic') || 'unknown';
+  const topic = headers().get('x-vendure-topic') || 'unknown';
   const secret = req.nextUrl.searchParams.get('secret');
   const isCollectionUpdate = collectionWebhooks.includes(topic);
   const isProductUpdate = productWebhooks.includes(topic);
 
-  if (!secret || secret !== process.env.SHOPIFY_REVALIDATION_SECRET) {
+  if (!secret || secret !== process.env.VENDURE_REVALIDATION_SECRET) {
     console.error('Invalid revalidation secret.');
     return NextResponse.json({ status: 200 });
   }

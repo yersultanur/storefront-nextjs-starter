@@ -332,7 +332,7 @@ export type VendureCart = {
   customer?: any;
   shippingAddress: ShippingAddress;
   shippingLines: ShippingLine[];
-  // lines: Line[];
+  lines: CartItem[];
   errorCode?: string;
 };
 
