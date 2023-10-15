@@ -7,7 +7,7 @@ import {
   RegisterCustomerAccountMutationVariables,
   UpdateAddressInput,
   UpdateCustomerInput,
-  VerifyCustomerAccountMutation,
+  VerifyCustomerAccountMutation
 } from '../../generated/graphql';
 import { QueryOptions, sdk, WithHeaders } from '~/graphqlWrapper';
 
@@ -15,107 +15,81 @@ export const login = async (
   email: string,
   password: string,
   rememberMe: boolean,
-  options: QueryOptions,
+  options: QueryOptions
 ): Promise<WithHeaders<LoginMutation['login']>> => {
   return sdk.login({ email, password, rememberMe }, options).then((res) => ({
     ...res.login,
-    _headers: res._headers,
+    _headers: res._headers
   }));
 };
 
 export const logout = async (
-  options: QueryOptions,
+  options: QueryOptions
 ): Promise<WithHeaders<LogoutMutation['logout']>> => {
   return sdk.logout({}, options).then((res) => ({
     ...res.logout,
-    _headers: res._headers,
+    _headers: res._headers
   }));
 };
 
 export const registerCustomerAccount = async (
   options: QueryOptions,
-  variables: RegisterCustomerAccountMutationVariables,
-): Promise<
-  WithHeaders<RegisterCustomerAccountMutation['registerCustomerAccount']>
-> => {
+  variables: RegisterCustomerAccountMutationVariables
+): Promise<WithHeaders<RegisterCustomerAccountMutation['registerCustomerAccount']>> => {
   return sdk.registerCustomerAccount(variables, options).then((res) => ({
     ...res.registerCustomerAccount,
-    _headers: res._headers,
+    _headers: res._headers
   }));
 };
 
 export const verifyCustomerAccount = async (
   options: QueryOptions,
   token: string,
-  password?: string,
-): Promise<
-  WithHeaders<VerifyCustomerAccountMutation['verifyCustomerAccount']>
-> => {
-  return sdk
-    .verifyCustomerAccount({ token, password }, options)
-    .then((res) => ({
-      ...res.verifyCustomerAccount,
-      _headers: res._headers,
-    }));
+  password?: string
+): Promise<WithHeaders<VerifyCustomerAccountMutation['verifyCustomerAccount']>> => {
+  return sdk.verifyCustomerAccount({ token, password }, options).then((res) => ({
+    ...res.verifyCustomerAccount,
+    _headers: res._headers
+  }));
 };
 
-export async function updateCustomer(
-  input: UpdateCustomerInput,
-  options: QueryOptions,
-) {
+export async function updateCustomer(input: UpdateCustomerInput, options: QueryOptions) {
   return sdk.updateCustomer({ input }, options);
 }
 
 export async function requestUpdateCustomerEmailAddress(
   password: string,
   newEmailAddress: string,
-  options: QueryOptions,
+  options: QueryOptions
 ) {
   return sdk
     .requestUpdateCustomerEmailAddress({ password, newEmailAddress }, options)
     .then((res) => res.requestUpdateCustomerEmailAddress);
 }
 
-export async function updateCustomerEmailAddress(
-  token: string,
-  options: QueryOptions,
-) {
+export async function updateCustomerEmailAddress(token: string, options: QueryOptions) {
   return sdk
     .updateCustomerEmailAddress({ token }, options)
     .then((res) => res.updateCustomerEmailAddress);
 }
 
-export async function updateCustomerAddress(
-  input: UpdateAddressInput,
-  options: QueryOptions,
-) {
-  return sdk
-    .updateCustomerAddress({ input }, options)
-    .then((res) => res.updateCustomerAddress);
+export async function updateCustomerAddress(input: UpdateAddressInput, options: QueryOptions) {
+  return sdk.updateCustomerAddress({ input }, options).then((res) => res.updateCustomerAddress);
 }
 
-export async function createCustomerAddress(
-  input: CreateAddressInput,
-  options: QueryOptions,
-) {
-  return sdk
-    .createCustomerAddress({ input }, options)
-    .then((res) => res.createCustomerAddress);
+export async function createCustomerAddress(input: CreateAddressInput, options: QueryOptions) {
+  return sdk.createCustomerAddress({ input }, options).then((res) => res.createCustomerAddress);
 }
 
 export async function deleteCustomerAddress(id: string, options: QueryOptions) {
-  return sdk
-    .deleteCustomerAddress({ id }, options)
-    .then((res) => res.deleteCustomerAddress);
+  return sdk.deleteCustomerAddress({ id }, options).then((res) => res.deleteCustomerAddress);
 }
 
 export async function updateCustomerPassword(
   input: { currentPassword: string; newPassword: string },
-  options: QueryOptions,
+  options: QueryOptions
 ) {
-  return sdk
-    .updateCustomerPassword(input, options)
-    .then((res) => res.updateCustomerPassword);
+  return sdk.updateCustomerPassword(input, options).then((res) => res.updateCustomerPassword);
 }
 
 gql`
@@ -182,14 +156,8 @@ gql`
 `;
 
 gql`
-  mutation requestUpdateCustomerEmailAddress(
-    $password: String!
-    $newEmailAddress: String!
-  ) {
-    requestUpdateCustomerEmailAddress(
-      password: $password
-      newEmailAddress: $newEmailAddress
-    ) {
+  mutation requestUpdateCustomerEmailAddress($password: String!, $newEmailAddress: String!) {
+    requestUpdateCustomerEmailAddress(password: $password, newEmailAddress: $newEmailAddress) {
       __typename
       ... on ErrorResult {
         errorCode
@@ -236,14 +204,8 @@ gql`
 `;
 
 gql`
-  mutation updateCustomerPassword(
-    $currentPassword: String!
-    $newPassword: String!
-  ) {
-    updateCustomerPassword(
-      currentPassword: $currentPassword
-      newPassword: $newPassword
-    ) {
+  mutation updateCustomerPassword($currentPassword: String!, $newPassword: String!) {
+    updateCustomerPassword(currentPassword: $currentPassword, newPassword: $newPassword) {
       __typename
       ... on Success {
         success

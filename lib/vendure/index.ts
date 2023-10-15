@@ -44,7 +44,6 @@ import { getCartQuery } from './providers/orders/order';
 import { getProductQuery, getProductsQuery } from './providers/products/products';
 import Search from 'components/layout/navbar/search';
 
-
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
 const key = process.env.VENDURE_API_KEY ?? `auth_token`;
 
@@ -61,14 +60,14 @@ export async function vendureFetch<T>({
   headers?: HeadersInit;
   query: string;
   tags?: string[];
-  variables?: Record<string, any>
+  variables?: Record<string, any>;
 }): Promise<{ status: number; body: T } | never> {
   try {
     const result = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'authorization': `Bearer ${key}`,
+        authorization: `Bearer ${key}`,
         ...headers
       },
       credentials: 'include',
@@ -117,28 +116,27 @@ const reshapeCart = (cart: VendureCart): Cart => {
   const cost = {
     subtotalAmount: cart.subTotal,
     totalAmount: cart.total,
-    totalTaxAmount: cart.totalWithTax,
+    totalTaxAmount: cart.totalWithTax
   };
 
   return {
     ...cart,
     lines: cart.lines,
     checkoutUrl,
-    cost,
+    cost
   };
 };
 
 const reshapeCollection = (collection: VendureCollection): Collection => {
-
-  const handle = collection?.slug
-  const title = collection.name
-  const description = collection.description
+  const handle = collection?.slug;
+  const title = collection.name;
+  const description = collection.description;
   const seo = {
     title: collection.name || '',
     description: collection.description || ''
   };
-  const updatedAt = collection.updatedAt
-  
+  const updatedAt = collection.updatedAt;
+
   return {
     ...collection,
     description,
@@ -169,9 +167,8 @@ const reshapeCollections = (collections: VendureCollection[]) => {
 const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] => {
   if (!images) return [];
 
-
   return images.map((image) => {
-    const url = image.preview
+    const url = image.preview;
     const filename = image.preview.match(/.*\/(.*)\..*/)![1];
     return {
       ...image,
@@ -181,12 +178,14 @@ const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] 
   });
 };
 
-const reshapeProductImages = (images?: SearchProductAsset[], productTitle?: string): ImageSearch[] => {
+const reshapeProductImages = (
+  images?: SearchProductAsset[],
+  productTitle?: string
+): ImageSearch[] => {
   if (!images) return [];
 
-
   return images.map((image) => {
-    const url = image.preview
+    const url = image.preview;
     const filename = image.preview.match(/.*\/(.*)\..*/)![1];
     return {
       ...image,
@@ -197,15 +196,14 @@ const reshapeProductImages = (images?: SearchProductAsset[], productTitle?: stri
 };
 
 const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean = true) => {
-  if (!product || (filterHiddenProducts)) {
+  if (!product || filterHiddenProducts) {
     return undefined;
   }
 
   const { variants, ...rest } = product;
-  const title = product.name
-  const handle = product.slug
+  const title = product.name;
+  const handle = product.slug;
   const images = reshapeImages(product.assets, title);
-
 
   return {
     ...rest,
@@ -219,8 +217,8 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
 const reshapeCollectionProducts = (product: SearchProductVendure) => {
   let amount = '0';
 
-  const title = product.items.productName
-  const handle = product.items.slug
+  const title = product.items.productName;
+  const handle = product.items.slug;
   const images = reshapeProductImages(product.items.productAsset, title);
   const priceRange = {
     maxVariantPrice: {
@@ -228,7 +226,6 @@ const reshapeCollectionProducts = (product: SearchProductVendure) => {
       currencyCode: product.items.currencyCode?.toUpperCase() ?? ''
     }
   };
-
 
   return {
     images,
@@ -259,7 +256,7 @@ export async function createCart(): Promise<Cart> {
     cache: 'no-store'
   });
 
-  const cart = res.body.data.addItemToOrder.cart
+  const cart = res.body.data.addItemToOrder.cart;
 
   return reshapeCart(cart);
 }
@@ -387,12 +384,10 @@ export async function getCollectionProducts({
     console.log(`No collection found for \`${collection}\``);
     return [];
   }
-  const product = res.body.data.search
+  const product = res.body.data.search;
 
   return reshapeCollectionProducts(product);
 }
-
-
 
 export async function getMenu(menu: string): Promise<any[]> {
   if (menu === 'next-js-frontend-header-menu') {
@@ -413,7 +408,6 @@ export async function getMenu(menu: string): Promise<any[]> {
 
   return [];
 }
-
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
   const res = await vendureFetch<VendureProductOperation>({

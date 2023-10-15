@@ -3,7 +3,6 @@ import gql from 'graphql-tag';
 import productFragment from '../../providers/fragments/product';
 import seoFragmentCollection from '../fragments/seoCollection';
 
-
 const collectionFragment = /* GraphQL */ `
   fragment collection on Collection {
     slug
@@ -17,7 +16,7 @@ const collectionFragment = /* GraphQL */ `
 
 export const getCollectionsQuery = /* GraphQL */ `
   query getCollections {
-    collections {
+    collections(options: { topLevelOnly: true }) {
       items {
         ...collection
       }
@@ -27,7 +26,7 @@ export const getCollectionsQuery = /* GraphQL */ `
 `;
 
 export const getCollectionQuery = /* GraphQL */ `
-  query getCollection($handle: String, $id: ID){
+  query getCollection($handle: String, $id: ID) {
     collection(slug: $handle, id: $id) {
       ...collection
     }
@@ -36,43 +35,35 @@ export const getCollectionQuery = /* GraphQL */ `
 `;
 
 export const getCollectionProductsQuery = /* GraphQL */ `
-query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
-  collection(slug: $handle) {
-    id
-    name
-    description
-    featuredAsset {
+  query GetCollectionProducts($handle: String, $skip: Int, $take: Int) {
+    collection(slug: $handle) {
       id
-      preview
-    }
-  }
-  search(
-    input: {
-      collectionSlug: $handle,
-      groupByProduct: true,
-      skip: $skip,
-      take: $take }
-  ) {
-    items {
-      productName
-      slug
-      productAsset {
+      name
+      description
+      featuredAsset {
         id
         preview
       }
-      price {
-        ... on SinglePrice {
-          value
+    }
+    search(input: { collectionSlug: $handle, groupByProduct: true, skip: $skip, take: $take }) {
+      items {
+        productName
+        slug
+        productAsset {
+          id
+          preview
         }
-        ... on PriceRange {
-          min
-          max
+        price {
+          ... on SinglePrice {
+            value
+          }
+          ... on PriceRange {
+            min
+            max
+          }
         }
+        currencyCode
       }
-      currencyCode
     }
   }
-}
 `;
-
-

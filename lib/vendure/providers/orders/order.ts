@@ -3,11 +3,11 @@ import { CreateAddressInput, CreateCustomerInput } from '../../generated/graphql
 import cartFragment from 'lib/vendure/providers/fragments/cart';
 
 export const getCartQuery = /* GraphQL */ `
-query getCartQuery($cartId: ID!) {
-  order(id: $cartId) {
-    ...cart
+  query getCartQuery($cartId: ID!) {
+    order(id: $cartId) {
+      ...cart
+    }
   }
-}
   ${cartFragment}
 `;
 

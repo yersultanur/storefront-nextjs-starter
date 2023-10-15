@@ -1,75 +1,75 @@
 import productFragment from './product';
 
 const cartFragment = /* GraphQL */ `
-fragment cart on Order {
-  __typename
-  id
-  code
-  active
-  createdAt
-  state
-  currencyCode
-  totalQuantity
-  subTotal
-  subTotalWithTax
-  taxSummary {
-    description
-    taxRate
-    taxTotal
-  }
-  shippingWithTax
-  totalWithTax
-  customer {
+  fragment cart on Order {
+    __typename
     id
-    firstName
-    lastName
-    emailAddress
-  }
-  shippingAddress {
-    fullName
-    streetLine1
-    streetLine2
-    company
-    city
-    province
-    postalCode
-    countryCode
-    phoneNumber
-  }
-  shippingLines {
-    shippingMethod {
-      id
-      name
+    code
+    active
+    createdAt
+    state
+    currencyCode
+    totalQuantity
+    subTotal
+    subTotalWithTax
+    taxSummary {
+      description
+      taxRate
+      taxTotal
     }
-    priceWithTax
-  }
-  lines {
-    id
-    unitPriceWithTax
-    linePriceWithTax
-    quantity
-    featuredAsset {
+    shippingWithTax
+    totalWithTax
+    customer {
       id
-      preview
+      firstName
+      lastName
+      emailAddress
     }
-    productVariant {
-      id
-      name
-      price
-      product {
+    shippingAddress {
+      fullName
+      streetLine1
+      streetLine2
+      company
+      city
+      province
+      postalCode
+      countryCode
+      phoneNumber
+    }
+    shippingLines {
+      shippingMethod {
         id
-        slug
+        name
+      }
+      priceWithTax
+    }
+    lines {
+      id
+      unitPriceWithTax
+      linePriceWithTax
+      quantity
+      featuredAsset {
+        id
+        preview
+      }
+      productVariant {
+        id
+        name
+        price
+        product {
+          id
+          slug
+        }
       }
     }
+    payments {
+      id
+      state
+      method
+      amount
+      metadata
+    }
   }
-  payments {
-    id
-    state
-    method
-    amount
-    metadata
-  }
-}
 `;
 
 export default cartFragment;

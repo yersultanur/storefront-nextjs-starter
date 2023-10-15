@@ -1,4 +1,9 @@
-import { Order, ProductOption as VendureProductOption, ProductVariant as VendureProductVariant, OrderLine as VendureLineItem } from './generated/graphql';
+import {
+  Order,
+  ProductOption as VendureProductOption,
+  ProductVariant as VendureProductVariant,
+  OrderLine as VendureLineItem
+} from './generated/graphql';
 
 export type Maybe<T> = T | null;
 
@@ -7,19 +12,19 @@ export type Items<T> = {
 };
 
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  DateTime: { input: any; output: any; }
+  DateTime: { input: any; output: any };
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSON: { input: any; output: any; }
+  JSON: { input: any; output: any };
   /** The `Money` scalar type represents monetary values and supports signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point). */
-  Money: { input: number; output: number; }
+  Money: { input: number; output: number };
   /** The `Upload` scalar type represents a file upload. */
-  Upload: { input: any; output: any; }
+  Upload: { input: any; output: any };
 };
 
 export type Menu = {
@@ -82,7 +87,6 @@ type Tag = {
   value: string;
 };
 
-
 export type Product = Partial<Omit<VendureProduct, 'variants' | 'assets' | 'images'>> & {
   title: string;
   variants: ProductVariant[];
@@ -96,10 +100,9 @@ export type Product = Partial<Omit<VendureProduct, 'variants' | 'assets' | 'imag
   descriptionHtml: string;
   availableForSale: boolean;
   options: Array<ProductOption>;
-  seo?: SEO
+  seo?: SEO;
   tags: Array<string>;
 };
-
 
 export type VendureProduct = {
   assets: Array<VendureImage>;
@@ -147,11 +150,9 @@ type Breadcrumb = {
   slug: string;
 };
 
-
-
 export type VendureCollectionsOperation = {
   data: {
-      collections:  Items<VendureCollection>;
+    collections: Items<VendureCollection>;
   };
 };
 
@@ -214,7 +215,7 @@ export type VendureUpdateCartOperation = {
 export type VendureCollectionProductsOperation = {
   data: {
     collection: VendureCollection[];
-    search: SearchProductVendure
+    search: SearchProductVendure;
   };
   variables: {
     handle: string;
@@ -222,7 +223,6 @@ export type VendureCollectionProductsOperation = {
     sortKey?: string;
   };
 };
-
 
 export type VendureCartOperation = {
   data: {
@@ -391,7 +391,7 @@ type Item = {
   slug: string;
   productAsset: ProductAsset[];
   currencyCode: CurrencyCode;
-  price: Price,
+  price: Price;
 };
 
 export type Price = PriceRange | SinglePrice;
