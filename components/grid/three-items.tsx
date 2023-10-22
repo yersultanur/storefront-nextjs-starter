@@ -1,6 +1,6 @@
 import { GridTileImage } from 'components/grid/tile';
 import { getCollectionProducts } from 'lib/vendure';
-import type { Product } from 'lib/vendure/types';
+import type { ProductCollection } from 'lib/vendure/types';
 import Link from 'next/link';
 
 function ThreeItemGridItem({
@@ -8,7 +8,7 @@ function ThreeItemGridItem({
   size,
   priority
 }: {
-  item: Product;
+  item: ProductCollection;
   size: 'full' | 'half';
   priority?: boolean;
 }) {

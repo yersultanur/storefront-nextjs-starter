@@ -1,7 +1,6 @@
 import {
   Order,
   ProductOption as VendureProductOption,
-  ProductVariant as VendureProductVariant,
   OrderLine as VendureLineItem
 } from './generated/graphql';
 
@@ -22,7 +21,7 @@ export type Scalars = {
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any };
   /** The `Money` scalar type represents monetary values and supports signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point). */
-  Money: { input: number; output: number };
+  Money: { input: string; output: string };
   /** The `Upload` scalar type represents a file upload. */
   Upload: { input: any; output: any };
 };
@@ -41,13 +40,8 @@ export type Image = VendureImage & {
   altText: string;
 };
 
-export type ImageSearch = SearchProductAsset & {
+export type ImageSearch = SearchResultAsset & {
   altText: string;
-};
-
-export type SearchProductAsset = {
-  id: Scalars['ID']['output'];
-  preview: Scalars['String']['output'];
 };
 
 export type VendureImage = {
@@ -90,10 +84,9 @@ type Tag = {
 export type Product = Partial<Omit<VendureProduct, 'variants' | 'assets' | 'images'>> & {
   title: string;
   variants: ProductVariant[];
-  images?: VendureImage[];
+  images: Image[];
   priceRange: {
     maxVariantPrice: Money;
-    minVariantPrice: Money;
   };
   featuredImage: FeaturedAsset;
   handle?: string | null;
@@ -117,7 +110,71 @@ export type VendureProduct = {
   slug: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
   /** Returns a paginated, sortable, filterable list of ProductVariants */
-  variants: Array<ProductVariant>;
+  variants: Array<VendureProductVariant>;
+};
+
+export type VendureProductVariant = {
+  assets: Array<VendureImage>;
+  createdAt: Scalars['DateTime']['output'];
+  currencyCode: CurrencyCode;
+  customFields?: Maybe<Scalars['JSON']['output']>;
+  facetValues: Array<FacetValue>;
+  featuredAsset?: Maybe<VendureImage>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  options: Array<ProductOption>;
+  price: Scalars['Money']['output'];
+  priceWithTax: Scalars['Money']['output'];
+  product: Product;
+  productId: Scalars['ID']['output'];
+  sku: Scalars['String']['output'];
+  stockLevel: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ProductCollection = Partial<Omit<SearchProductVendure, 'productAsset' | 'images'>> & {
+  title: string;
+  priceRange: {
+    maxVariantPrice: Money;
+    minVariantPrice: Money;
+  };
+  featuredImage: FeaturedImage;
+  handle?: string | null;
+};
+
+export type FeaturedImage = SearchResultAsset & {
+  url: string;
+  width?: number;
+  height?: number;
+  altText: string;
+};
+
+export type SearchResultPrice = PriceRange;
+
+export type SearchResultAsset = {
+  id?: Scalars['ID']['output'];
+  preview?: Scalars['String']['output'];
+};
+
+export type SearchProductVendure = {
+  collectionIds: Array<Scalars['ID']['output']>;
+  currencyCode: CurrencyCode;
+  description: Scalars['String']['output'];
+  facetIds: Array<Scalars['ID']['output']>;
+  facetValueIds: Array<Scalars['ID']['output']>;
+  inStock: Scalars['Boolean']['output'];
+  price: SearchResultPrice;
+  priceWithTax: SearchResultPrice;
+  productAsset: Maybe<SearchResultAsset>;
+  productId: Scalars['ID']['output'];
+  productName: Scalars['String']['output'];
+  productVariantAsset?: Maybe<SearchResultAsset>;
+  productVariantId: Scalars['ID']['output'];
+  productVariantName: Scalars['String']['output'];
+  /** A relevance score for the result. Differs between database implementations */
+  score: Scalars['Float']['output'];
+  sku: Scalars['String']['output'];
+  slug?: Scalars['String']['output'];
 };
 
 export type VendureProductOperation = {
@@ -215,7 +272,7 @@ export type VendureUpdateCartOperation = {
 export type VendureCollectionProductsOperation = {
   data: {
     collection: VendureCollection[];
-    search: SearchProductVendure;
+    search: Items<SearchProductVendure>;
   };
   variables: {
     handle: string;
@@ -414,11 +471,6 @@ type FilterFacetValueDetail = {
 type FilterFacetValue = {
   count: number;
   facetValue: FilterFacetValueDetail;
-};
-
-export type SearchProductVendure = {
-  items: Item;
-  facetValues: FilterFacetValue[];
 };
 
 export type FacetWithValues = {

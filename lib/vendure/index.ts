@@ -25,9 +25,11 @@ import {
   VendureProduct,
   Menu,
   SearchProductVendure,
-  SearchProductAsset,
+  SearchResultAsset,
   ImageSearch,
-  Items
+  Items,
+  ProductCollection,
+  FeaturedImage
 } from './types';
 import {
   getCollectionProductsQuery,
@@ -164,7 +166,7 @@ const reshapeCollections = (collections: VendureCollection[]) => {
   return reshapedCollections;
 };
 
-const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] => {
+const reshapeImages = (images?: VendureImage[], title?: string): Image[] => {
   if (!images) return [];
 
   return images.map((image) => {
@@ -173,24 +175,7 @@ const reshapeImages = (images?: VendureImage[], productTitle?: string): Image[] 
     return {
       ...image,
       url,
-      altText: `${productTitle} - ${filename}`
-    };
-  });
-};
-
-const reshapeProductImages = (
-  images?: SearchProductAsset[],
-  productTitle?: string
-): ImageSearch[] => {
-  if (!images) return [];
-
-  return images.map((image) => {
-    const url = image.preview;
-    const filename = image.preview.match(/.*\/(.*)\..*/)![1];
-    return {
-      ...image,
-      url,
-      altText: `${productTitle} - ${filename}`
+      altText: `${title} - ${filename}`
     };
   });
 };
@@ -200,37 +185,34 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
     return undefined;
   }
 
-  const { variants, ...rest } = product;
+  const variants = product.variants?.[0];
   const title = product.name;
   const handle = product.slug;
   const images = reshapeImages(product.assets, title);
-
-  return {
-    ...rest,
-    images,
-    variants: variants,
-    handle,
-    title
-  };
-};
-
-const reshapeCollectionProducts = (product: SearchProductVendure) => {
-  let amount = '0';
-
-  const title = product.items.productName;
-  const handle = product.items.slug;
-  const images = reshapeProductImages(product.items.productAsset, title);
   const priceRange = {
     maxVariantPrice: {
-      amount,
-      currencyCode: product.items.currencyCode?.toUpperCase() ?? ''
+      amount: product.variants?.[0]?.price,
+      currencyCode: product.variants?.[0]?.currencyCode?.toUpperCase() ?? ''
     }
   };
-
+  const featuredImageFilename =
+    product.variants?.[0]?.featuredAsset?.preview?.match(/.*\/(.*)\..*/)![1];
+  const featuredImage = {
+    url: product.variants?.[0]?.featuredAsset?.preview ?? '',
+    altText: `${title} - ${featuredImageFilename}` ?? ''
+  };
+  const descriptionHtml = product.description ?? '';
+  const availableForSale = true;
   return {
+    ...product,
     images,
+    variants,
     handle,
-    title
+    priceRange,
+    featuredImage,
+    descriptionHtml,
+    title,
+    availableForSale
   };
 };
 
@@ -240,6 +222,50 @@ const reshapeProducts = (products: VendureProduct[]) => {
   for (const product of products) {
     if (product) {
       const reshapedProduct = reshapeProduct(product);
+
+      if (reshapedProduct) {
+        reshapedProducts.push(reshapedProduct);
+      }
+    }
+  }
+
+  return reshapedProducts;
+};
+
+const reshapeCollectionProduct = (product: SearchProductVendure): ProductCollection => {
+  const title = product.productName;
+  const handle = product.slug;
+  const priceRange = {
+    maxVariantPrice: {
+      amount: product.price?.max,
+      currencyCode: product.currencyCode?.toUpperCase() ?? ''
+    },
+    minVariantPrice: {
+      amount: product.price?.min,
+      currencyCode: product.currencyCode?.toUpperCase() ?? ''
+    }
+  };
+  const featuredImageFilename = product.productAsset?.preview?.match(/.*\/(.*)\..*/)![1];
+  const featuredImage = {
+    url: product.productAsset?.preview ?? '',
+    altText: `${title} - ${featuredImageFilename}` ?? ''
+  };
+
+  return {
+    ...product,
+    handle,
+    featuredImage,
+    priceRange,
+    title
+  };
+};
+
+const reshapeCollectionProducts = (products: SearchProductVendure[]) => {
+  const reshapedProducts = [];
+
+  for (const product of products) {
+    if (product) {
+      const reshapedProduct = reshapeCollectionProduct(product);
 
       if (reshapedProduct) {
         reshapedProducts.push(reshapedProduct);
@@ -340,24 +366,12 @@ export async function getCollections(): Promise<Collection[]> {
   });
   const vendureCollections = removeItems(res.body?.data?.collections);
   const collections = [
-    {
-      handle: '',
-      title: 'All',
-      description: 'All products',
-      seo: {
-        title: 'All',
-        description: 'All products'
-      },
-      path: '/search',
-      updatedAt: new Date().toISOString()
-    },
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(vendureCollections).filter(
       (collection) => !collection?.handle?.startsWith('hidden')
     )
   ];
-
   return collections;
 }
 
@@ -369,7 +383,7 @@ export async function getCollectionProducts({
   collection: string;
   reverse?: boolean;
   sortKey?: string;
-}): Promise<Product[]> {
+}): Promise<ProductCollection[]> {
   const res = await vendureFetch<VendureCollectionProductsOperation>({
     query: getCollectionProductsQuery,
     tags: [TAGS.collections, TAGS.products],
@@ -384,7 +398,7 @@ export async function getCollectionProducts({
     console.log(`No collection found for \`${collection}\``);
     return [];
   }
-  const product = res.body.data.search;
+  const product = removeItems(res.body?.data?.search);
 
   return reshapeCollectionProducts(product);
 }
