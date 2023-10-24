@@ -952,7 +952,13 @@ export type Facet = Node & {
   name: Scalars['String']['output'];
   translations: Array<FacetTranslation>;
   updatedAt: Scalars['DateTime']['output'];
+  /** Returns a paginated, sortable, filterable list of the Facet's values. Added in v2.1.0. */
+  valueList: FacetValueList;
   values: Array<FacetValue>;
+};
+
+export type FacetValueListArgs = {
+  options?: InputMaybe<FacetValueListOptions>;
 };
 
 export type FacetFilterParameter = {
@@ -1006,6 +1012,7 @@ export type FacetValue = Node & {
   createdAt: Scalars['DateTime']['output'];
   customFields?: Maybe<Scalars['JSON']['output']>;
   facet: Facet;
+  facetId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
   languageCode: LanguageCode;
   name: Scalars['String']['output'];
@@ -1026,6 +1033,35 @@ export type FacetValueFilterInput = {
   or?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
+export type FacetValueFilterParameter = {
+  code?: InputMaybe<StringOperators>;
+  createdAt?: InputMaybe<DateOperators>;
+  facetId?: InputMaybe<IdOperators>;
+  id?: InputMaybe<IdOperators>;
+  languageCode?: InputMaybe<StringOperators>;
+  name?: InputMaybe<StringOperators>;
+  updatedAt?: InputMaybe<DateOperators>;
+};
+
+export type FacetValueList = PaginatedList & {
+  __typename?: 'FacetValueList';
+  items: Array<FacetValue>;
+  totalItems: Scalars['Int']['output'];
+};
+
+export type FacetValueListOptions = {
+  /** Allows the results to be filtered */
+  filter?: InputMaybe<FacetValueFilterParameter>;
+  /** Specifies whether multiple "filter" arguments should be combines with a logical AND or OR operation. Defaults to AND. */
+  filterOperator?: InputMaybe<LogicalOperator>;
+  /** Skips the first n results, for use in pagination */
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  /** Specifies which properties to sort the results by */
+  sort?: InputMaybe<FacetValueSortParameter>;
+  /** Takes n results, for use in pagination */
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /**
  * Which FacetValues are present in the products returned
  * by the search, and in what quantity.
@@ -1034,6 +1070,15 @@ export type FacetValueResult = {
   __typename?: 'FacetValueResult';
   count: Scalars['Int']['output'];
   facetValue: FacetValue;
+};
+
+export type FacetValueSortParameter = {
+  code?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  facetId?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
 };
 
 export type FacetValueTranslation = {
@@ -2054,6 +2099,7 @@ export type OrderLine = Node & {
   proratedUnitPrice: Scalars['Money']['output'];
   /** The proratedUnitPrice including tax */
   proratedUnitPriceWithTax: Scalars['Money']['output'];
+  /** The quantity of items purchased */
   quantity: Scalars['Int']['output'];
   taxLines: Array<TaxLine>;
   taxRate: Scalars['Float']['output'];
@@ -2711,6 +2757,7 @@ export type Promotion = Node & {
   startsAt?: Maybe<Scalars['DateTime']['output']>;
   translations: Array<PromotionTranslation>;
   updatedAt: Scalars['DateTime']['output'];
+  usageLimit?: Maybe<Scalars['Int']['output']>;
 };
 
 export type PromotionList = PaginatedList & {
@@ -3945,8 +3992,11 @@ export type ProductFragment = {
   name: string;
   description: string;
   updatedAt: any;
+  facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
   optionGroups: Array<{
     __typename?: 'ProductOptionGroup';
+    name: string;
+    code: string;
     options: Array<{ __typename?: 'ProductOption'; id: string; name: string; code: string }>;
   }>;
   variants: Array<{
@@ -4065,7 +4115,7 @@ export type AddToCartMutation = {
 };
 
 export type CreateCartMutationVariables = Exact<{
-  productVariantId: Scalars['ID']['input'];
+  cartId: Scalars['ID']['input'];
   quantity: Scalars['Int']['input'];
 }>;
 
@@ -4843,8 +4893,11 @@ export type GetProductQuery = {
     name: string;
     description: string;
     updatedAt: any;
+    facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
     optionGroups: Array<{
       __typename?: 'ProductOptionGroup';
+      name: string;
+      code: string;
       options: Array<{ __typename?: 'ProductOption'; id: string; name: string; code: string }>;
     }>;
     variants: Array<{
@@ -4888,8 +4941,11 @@ export type GetProductsQuery = {
       name: string;
       description: string;
       updatedAt: any;
+      facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
       optionGroups: Array<{
         __typename?: 'ProductOptionGroup';
+        name: string;
+        code: string;
         options: Array<{ __typename?: 'ProductOption'; id: string; name: string; code: string }>;
       }>;
       variants: Array<{
@@ -5094,7 +5150,13 @@ export const ProductFragmentDoc = gql`
     id
     name
     description
+    facetValues {
+      name
+      code
+    }
     optionGroups {
+      name
+      code
       options {
         id
         name
@@ -5412,7 +5474,7 @@ export const GenerateBraintreeClientTokenDocument = gql`
 `;
 export const GetCollectionsDocument = gql`
   query getCollections {
-    collections {
+    collections(options: { topLevelOnly: true }) {
       items {
         ...collection
       }
@@ -5579,8 +5641,8 @@ export const AddToCartDocument = gql`
   ${CartFragmentDoc}
 `;
 export const CreateCartDocument = gql`
-  mutation createCart($productVariantId: ID!, $quantity: Int!) {
-    addItemToOrder(productVariantId: $productVariantId, quantity: $quantity) {
+  mutation createCart($cartId: ID!, $quantity: Int!) {
+    addItemToOrder(productVariantId: $cartId, quantity: $quantity) {
       ...cart
       ... on ErrorResult {
         errorCode

@@ -1405,6 +1405,11 @@ type Facet implements Node {
   name: String!
   translations: [FacetTranslation!]!
   updatedAt: DateTime!
+
+  """
+  Returns a paginated, sortable, filterable list of the Facet's values. Added in v2.1.0.
+  """
+  valueList(options: FacetValueListOptions): FacetValueList!
   values: [FacetValue!]!
 }
 
@@ -1470,6 +1475,7 @@ type FacetValue implements Node {
   createdAt: DateTime!
   customFields: JSON
   facet: Facet!
+  facetId: ID!
   id: ID!
   languageCode: LanguageCode!
   name: String!
@@ -1490,6 +1496,48 @@ input FacetValueFilterInput {
   or: [ID!]
 }
 
+input FacetValueFilterParameter {
+  code: StringOperators
+  createdAt: DateOperators
+  facetId: IDOperators
+  id: IDOperators
+  languageCode: StringOperators
+  name: StringOperators
+  updatedAt: DateOperators
+}
+
+type FacetValueList implements PaginatedList {
+  items: [FacetValue!]!
+  totalItems: Int!
+}
+
+input FacetValueListOptions {
+  """
+  Allows the results to be filtered
+  """
+  filter: FacetValueFilterParameter
+
+  """
+  Specifies whether multiple "filter" arguments should be combines with a logical AND or OR operation. Defaults to AND.
+  """
+  filterOperator: LogicalOperator
+
+  """
+  Skips the first n results, for use in pagination
+  """
+  skip: Int
+
+  """
+  Specifies which properties to sort the results by
+  """
+  sort: FacetValueSortParameter
+
+  """
+  Takes n results, for use in pagination
+  """
+  take: Int
+}
+
 """
 Which FacetValues are present in the products returned
 by the search, and in what quantity.
@@ -1497,6 +1545,15 @@ by the search, and in what quantity.
 type FacetValueResult {
   count: Int!
   facetValue: FacetValue!
+}
+
+input FacetValueSortParameter {
+  code: SortOrder
+  createdAt: SortOrder
+  facetId: SortOrder
+  id: SortOrder
+  name: SortOrder
+  updatedAt: SortOrder
 }
 
 type FacetValueTranslation {
@@ -3023,6 +3080,10 @@ type OrderLine implements Node {
   The proratedUnitPrice including tax
   """
   proratedUnitPriceWithTax: Money!
+
+  """
+  The quantity of items purchased
+  """
   quantity: Int!
   taxLines: [TaxLine!]!
   taxRate: Float!
@@ -4017,6 +4078,7 @@ type Promotion implements Node {
   startsAt: DateTime
   translations: [PromotionTranslation!]!
   updatedAt: DateTime!
+  usageLimit: Int
 }
 
 type PromotionList implements PaginatedList {

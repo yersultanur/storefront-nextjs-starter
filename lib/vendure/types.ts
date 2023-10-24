@@ -1,8 +1,4 @@
-import {
-  Order,
-  ProductOption as VendureProductOption,
-  OrderLine as VendureLineItem
-} from './generated/graphql';
+import { Order, OrderLine as VendureLineItem } from './generated/graphql';
 
 export type Maybe<T> = T | null;
 
@@ -38,6 +34,7 @@ export type Money = {
 
 export type Image = VendureImage & {
   altText: string;
+  url: string;
 };
 
 export type ImageSearch = SearchResultAsset & {
@@ -45,13 +42,13 @@ export type ImageSearch = SearchResultAsset & {
 };
 
 export type VendureImage = {
-  createdAt: Scalars['DateTime']['output'];
-  height: Scalars['Int']['output'];
+  createdAt?: Scalars['DateTime']['output'];
+  height?: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   preview: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-  width: Scalars['Int']['output'];
+  updatedAt?: Scalars['DateTime']['output'];
+  width?: Scalars['Int']['output'];
 };
 
 export type Collection = VendureCollection & {
@@ -81,19 +78,25 @@ type Tag = {
   value: string;
 };
 
-export type Product = Partial<Omit<VendureProduct, 'variants' | 'assets' | 'images'>> & {
+export type Product = Partial<
+  Omit<VendureProduct, 'variants' | 'assets' | 'images' | 'options' | 'tags'>
+> & {
   title: string;
   variants: ProductVariant[];
   images: Image[];
   priceRange: {
     maxVariantPrice: Money;
+    minVariantPrice: Money;
   };
-  featuredImage: FeaturedAsset;
+  featuredImage: FeaturedImage;
   handle?: string | null;
   descriptionHtml: string;
   availableForSale: boolean;
   options: Array<ProductOption>;
-  seo?: SEO;
+  seo: {
+    title?: string;
+    description?: string;
+  };
   tags: Array<string>;
 };
 
@@ -111,6 +114,7 @@ export type VendureProduct = {
   updatedAt: Scalars['DateTime']['output'];
   /** Returns a paginated, sortable, filterable list of ProductVariants */
   variants: Array<VendureProductVariant>;
+  optionGroups: Array<VendureProductOptionGroup>;
 };
 
 export type VendureProductVariant = {
@@ -122,7 +126,7 @@ export type VendureProductVariant = {
   featuredAsset?: Maybe<VendureImage>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  options: Array<ProductOption>;
+  options: Array<VendureProductOption>;
   price: Scalars['Money']['output'];
   priceWithTax: Scalars['Money']['output'];
   product: Product;
@@ -186,7 +190,7 @@ export type VendureProductOperation = {
 
 export type VendureProductsOperation = {
   data: {
-    products: VendureProduct;
+    products: VendureProduct[];
   };
   variables: {
     query?: string;
@@ -195,10 +199,31 @@ export type VendureProductsOperation = {
   };
 };
 
-export type ProductOption = Omit<VendureProductOption, 'values'> & {
+export type ProductOption = Omit<VendureProductOption, 'values' | 'name'> & {
   availableForSale: boolean;
   name: string;
   values: string[];
+};
+
+export type VendureProductOption = {
+  code: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
+  group?: VendureProductOptionGroup;
+  groupId?: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type VendureProductOptionGroup = {
+  code: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  options: Array<VendureProductOption>;
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 type Breadcrumb = {
@@ -351,16 +376,16 @@ export type ShippingAddress = {
   country?: string;
 };
 
-export type ProductVariant = VendureProductVariant & {
-  id: string;
+export type ProductVariant = Omit<VendureProductVariant, 'price' | 'name'> & {
   name: string;
-  product: Product;
   availableForSale: boolean;
-  selectedOptions: {
-    name: string;
-    value: string;
-  }[];
+  selectedOptions: SelectedOption[];
   price: Money;
+};
+
+export type SelectedOption = {
+  name: string;
+  value: string;
 };
 
 export type Line = {

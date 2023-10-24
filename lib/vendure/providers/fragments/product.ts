@@ -6,7 +6,13 @@ const productFragment = /* GraphQL */ `
     id
     name
     description
+    facetValues {
+      name
+      code
+    }
     optionGroups {
+      name
+      code
       options {
         id
         name

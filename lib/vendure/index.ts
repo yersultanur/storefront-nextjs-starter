@@ -23,13 +23,15 @@ import {
   VendureImage,
   VendureCollection,
   VendureProduct,
-  Menu,
+  ProductVariant,
+  SelectedOption,
+  VendureProductOption,
+  VendureProductVariant,
+  VendureProductOptionGroup,
   SearchProductVendure,
-  SearchResultAsset,
-  ImageSearch,
   Items,
   ProductCollection,
-  FeaturedImage
+  ProductOption
 } from './types';
 import {
   getCollectionProductsQuery,
@@ -180,18 +182,59 @@ const reshapeImages = (images?: VendureImage[], title?: string): Image[] => {
   });
 };
 
-const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean = true) => {
-  if (!product || filterHiddenProducts) {
-    return undefined;
+const reshapeProductOption = (productOption: VendureProductOptionGroup): ProductOption => {
+  const availableForSale = true;
+  const name = productOption.name;
+  let values = productOption.options.map((option) => option.code) || [];
+  values = [...new Set(values)];
+
+  return {
+    ...productOption,
+    availableForSale,
+    name,
+    values
+  };
+};
+const reshapeProductVariant = (
+  productVariant: VendureProductVariant,
+  productOptions?: VendureProductOption[]
+): ProductVariant => {
+  let selectedOptions: SelectedOption[] = [];
+  if (productOptions && productVariant.options) {
+    selectedOptions = productVariant.options.map((option) => ({
+      name: option.name ?? '',
+      value: option.code
+    }));
   }
 
-  const variants = product.variants?.[0];
+  const availableForSale = true;
+  const price = {
+    amount: productVariant.price,
+    currencyCode: productVariant.currencyCode.toUpperCase() ?? ''
+  };
+
+  return {
+    ...productVariant,
+    availableForSale,
+    selectedOptions,
+    price
+  };
+};
+const reshapeProduct = (product: VendureProduct): Product => {
+  const variants = product.variants.map((variant) =>
+    reshapeProductVariant(variant, product.optionGroups)
+  );
+
   const title = product.name;
   const handle = product.slug;
   const images = reshapeImages(product.assets, title);
   const priceRange = {
     maxVariantPrice: {
-      amount: product.variants?.[0]?.price,
+      amount: product.variants ? product.variants.map((variant) => variant.price || '') : [],
+      currencyCode: product.variants?.[0]?.currencyCode?.toUpperCase() ?? ''
+    },
+    minVariantPrice: {
+      amount: product.variants ? product.variants.map((variant) => variant.price || '') : [],
       currencyCode: product.variants?.[0]?.currencyCode?.toUpperCase() ?? ''
     }
   };
@@ -201,8 +244,21 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
     url: product.variants?.[0]?.featuredAsset?.preview ?? '',
     altText: `${title} - ${featuredImageFilename}` ?? ''
   };
+
+  const tags = (product.facetValues || []).map((facetValue) => facetValue.name);
+
+  let options = [] as ProductOption[];
+  product.optionGroups &&
+    (options = product.optionGroups.map((option) => reshapeProductOption(option)));
+
+  const seo = {
+    title: product.name,
+    description: product.description
+  };
+
   const descriptionHtml = product.description ?? '';
   const availableForSale = true;
+
   return {
     ...product,
     images,
@@ -212,7 +268,10 @@ const reshapeProduct = (product: VendureProduct, filterHiddenProducts: boolean =
     featuredImage,
     descriptionHtml,
     title,
-    availableForSale
+    seo,
+    availableForSale,
+    tags,
+    options
   };
 };
 
@@ -432,7 +491,7 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
     }
   });
 
-  return reshapeProduct(res.body.data.product, false);
+  return reshapeProduct(res.body.data.product);
 }
 
 export async function getProductRecommendations(productId: string): Promise<Product[]> {
