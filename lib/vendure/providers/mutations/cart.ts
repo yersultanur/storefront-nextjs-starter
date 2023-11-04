@@ -8,6 +8,12 @@ export const addToCartMutation = /* GraphQL */ `
         errorCode
         message
       }
+      ... on InsufficientStockError {
+        quantityAvailable
+        order {
+          ...cart
+        }
+      }
     }
   }
   ${cartFragment}

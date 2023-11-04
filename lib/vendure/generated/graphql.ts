@@ -4041,7 +4041,79 @@ export type AddToCartMutationVariables = Exact<{
 export type AddToCartMutation = {
   __typename?: 'Mutation';
   addItemToOrder:
-    | { __typename?: 'InsufficientStockError'; errorCode: ErrorCode; message: string }
+    | {
+        __typename?: 'InsufficientStockError';
+        errorCode: ErrorCode;
+        message: string;
+        quantityAvailable: number;
+        order: {
+          __typename: 'Order';
+          id: string;
+          code: string;
+          active: boolean;
+          createdAt: any;
+          state: string;
+          currencyCode: CurrencyCode;
+          totalQuantity: number;
+          subTotal: number;
+          subTotalWithTax: number;
+          shippingWithTax: number;
+          totalWithTax: number;
+          taxSummary: Array<{
+            __typename?: 'OrderTaxSummary';
+            description: string;
+            taxRate: number;
+            taxTotal: number;
+          }>;
+          customer?: {
+            __typename?: 'Customer';
+            id: string;
+            firstName: string;
+            lastName: string;
+            emailAddress: string;
+          } | null;
+          shippingAddress?: {
+            __typename?: 'OrderAddress';
+            fullName?: string | null;
+            streetLine1?: string | null;
+            streetLine2?: string | null;
+            company?: string | null;
+            city?: string | null;
+            province?: string | null;
+            postalCode?: string | null;
+            countryCode?: string | null;
+            phoneNumber?: string | null;
+          } | null;
+          shippingLines: Array<{
+            __typename?: 'ShippingLine';
+            priceWithTax: number;
+            shippingMethod: { __typename?: 'ShippingMethod'; id: string; name: string };
+          }>;
+          lines: Array<{
+            __typename?: 'OrderLine';
+            id: string;
+            unitPriceWithTax: number;
+            linePriceWithTax: number;
+            quantity: number;
+            featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+            productVariant: {
+              __typename?: 'ProductVariant';
+              id: string;
+              name: string;
+              price: number;
+              product: { __typename?: 'Product'; id: string; slug: string };
+            };
+          }>;
+          payments?: Array<{
+            __typename?: 'Payment';
+            id: string;
+            state: string;
+            method: string;
+            amount: number;
+            metadata?: any | null;
+          }> | null;
+        };
+      }
     | { __typename?: 'NegativeQuantityError'; errorCode: ErrorCode; message: string }
     | {
         __typename: 'Order';
@@ -4976,6 +5048,52 @@ export type GetProductsQuery = {
   };
 };
 
+export type GetProductRecommendationsQueryVariables = Exact<{
+  productId: Scalars['ID']['input'];
+}>;
+
+export type GetProductRecommendationsQuery = {
+  __typename?: 'Query';
+  product?: {
+    __typename?: 'Product';
+    id: string;
+    name: string;
+    description: string;
+    updatedAt: any;
+    facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+    optionGroups: Array<{
+      __typename?: 'ProductOptionGroup';
+      name: string;
+      code: string;
+      options: Array<{ __typename?: 'ProductOption'; id: string; name: string; code: string }>;
+    }>;
+    variants: Array<{
+      __typename?: 'ProductVariant';
+      id: string;
+      name: string;
+      price: number;
+      currencyCode: CurrencyCode;
+      options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+    }>;
+    featuredAsset?: {
+      __typename?: 'Asset';
+      id: string;
+      preview: string;
+      name: string;
+      width: number;
+      height: number;
+    } | null;
+    assets: Array<{
+      __typename?: 'Asset';
+      id: string;
+      preview: string;
+      name: string;
+      width: number;
+      height: number;
+    }>;
+  } | null;
+};
+
 export type ListedProductFragment = {
   __typename?: 'SearchResult';
   productId: string;
@@ -5636,6 +5754,12 @@ export const AddToCartDocument = gql`
         errorCode
         message
       }
+      ... on InsufficientStockError {
+        quantityAvailable
+        order {
+          ...cart
+        }
+      }
     }
   }
   ${CartFragmentDoc}
@@ -5750,6 +5874,14 @@ export const GetProductsDocument = gql`
       items {
         ...product
       }
+    }
+  }
+  ${ProductFragmentDoc}
+`;
+export const GetProductRecommendationsDocument = gql`
+  query getProductRecommendations($productId: ID!) {
+    product(id: $productId) {
+      ...product
     }
   }
   ${ProductFragmentDoc}
@@ -6175,6 +6307,16 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
         variables,
         options
       ) as Promise<GetProductsQuery>;
+    },
+    getProductRecommendations(
+      variables: GetProductRecommendationsQueryVariables,
+      options?: C
+    ): Promise<GetProductRecommendationsQuery> {
+      return requester<GetProductRecommendationsQuery, GetProductRecommendationsQueryVariables>(
+        GetProductRecommendationsDocument,
+        variables,
+        options
+      ) as Promise<GetProductRecommendationsQuery>;
     },
     search(variables: SearchQueryVariables, options?: C): Promise<SearchQuery> {
       return requester<SearchQuery, SearchQueryVariables>(

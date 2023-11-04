@@ -1,5 +1,3 @@
-import { Order, OrderLine as VendureLineItem } from './generated/graphql';
-
 export type Maybe<T> = T | null;
 
 export type Items<T> = {
@@ -129,7 +127,7 @@ export type VendureProductVariant = {
   options: Array<VendureProductOption>;
   price: Scalars['Money']['output'];
   priceWithTax: Scalars['Money']['output'];
-  product: Product;
+  product: VendureProduct;
   productId: Scalars['ID']['output'];
   sku: Scalars['String']['output'];
   stockLevel: Scalars['String']['output'];
@@ -199,6 +197,15 @@ export type VendureProductsOperation = {
   };
 };
 
+export type VendureProductRecommendationsOperation = {
+  data: {
+    product: VendureProduct[];
+  };
+  variables: {
+    productId: string;
+  };
+};
+
 export type ProductOption = Omit<VendureProductOption, 'values' | 'name'> & {
   availableForSale: boolean;
   name: string;
@@ -255,10 +262,7 @@ export type VendureAddToCartOperation = {
   };
   variables: {
     cartId: string;
-    lines: {
-      merchandiseId: string;
-      quantity: number;
-    }[];
+    quantity: number;
   };
 };
 
@@ -398,24 +402,123 @@ export type Line = {
 };
 
 export type VendureCart = {
-  id: string;
-  code: string;
-  active: boolean;
-  createdAt: Date;
-  state: string;
+  /** An order is active as long as the payment process has not been completed */
+  active: Scalars['Boolean']['output'];
+  // billingAddress?: Maybe<OrderAddress>;
+  /** A unique code for the Order */
+  code: Scalars['String']['output'];
+  /** An array of all coupon codes applied to the Order */
+  couponCodes: Array<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
   currencyCode: CurrencyCode;
-  totalQuantity: number;
-  subTotal: Money;
-  subTotalWithTax: number;
-  taxSummary: TaxSummary[];
-  shippingWithTax: number;
-  total: Money;
-  totalWithTax: Money;
-  customer?: any;
-  shippingAddress: ShippingAddress;
-  shippingLines: ShippingLine[];
-  lines: CartItem[];
-  errorCode?: string;
+  customFields?: Maybe<Scalars['JSON']['output']>;
+  // customer?: Maybe<Customer>;
+  // discounts: Array<Discount>;
+  // fulfillments?: Maybe<Array<Fulfillment>>;
+  // history: HistoryEntryList;
+  id: Scalars['ID']['output'];
+  lines: Array<VendureLineItem>;
+  /**
+   * The date & time that the Order was placed, i.e. the Customer
+   * completed the checkout and the Order is no longer "active"
+   */
+  orderPlacedAt?: Maybe<Scalars['DateTime']['output']>;
+  // payments?: Maybe<Array<Payment>>;
+  /** Promotions applied to the order. Only gets populated after the payment process has completed. */
+  // promotions: Array<Promotion>;
+  shipping: Scalars['Money']['output'];
+  // shippingAddress?: Maybe<OrderAddress>;
+  shippingLines: Array<ShippingLine>;
+  shippingWithTax: Scalars['Money']['output'];
+  state: Scalars['String']['output'];
+  /**
+   * The subTotal is the total of all OrderLines in the Order. This figure also includes any Order-level
+   * discounts which have been prorated (proportionally distributed) amongst the items of each OrderLine.
+   * To get a total of all OrderLines which does not account for prorated discounts, use the
+   * sum of `OrderLine.discountedLinePrice` values.
+   */
+  subTotal: Scalars['Money']['output'];
+  /** Same as subTotal, but inclusive of tax */
+  subTotalWithTax: Scalars['Money']['output'];
+  /**
+   * Surcharges are arbitrary modifications to the Order total which are neither
+   * ProductVariants nor discounts resulting from applied Promotions. For example,
+   * one-off discounts based on customer interaction, or surcharges based on payment
+   * methods.
+   */
+  // surcharges: Array<Surcharge>;
+  /** A summary of the taxes being applied to this Order */
+  // taxSummary: Array<OrderTaxSummary>;
+  /** Equal to subTotal plus shipping */
+  total: Scalars['Money']['output'];
+  totalQuantity: Scalars['Int']['output'];
+  /** The final payable amount. Equal to subTotalWithTax plus shippingWithTax */
+  totalWithTax: Scalars['Money']['output'];
+  // type: OrderType;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type VendureLineItem = {
+  createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
+  /** The price of the line including discounts, excluding tax */
+  discountedLinePrice: Scalars['Money']['output'];
+  /** The price of the line including discounts and tax */
+  discountedLinePriceWithTax: Scalars['Money']['output'];
+  /**
+   * The price of a single unit including discounts, excluding tax.
+   *
+   * If Order-level discounts have been applied, this will not be the
+   * actual taxable unit price (see `proratedUnitPrice`), but is generally the
+   * correct price to display to customers to avoid confusion
+   * about the internal handling of distributed Order-level discounts.
+   */
+  discountedUnitPrice: Scalars['Money']['output'];
+  /** The price of a single unit including discounts and tax */
+  discountedUnitPriceWithTax: Scalars['Money']['output'];
+  // discounts: Array<Discount>;
+  featuredAsset?: Maybe<VendureImage>;
+  // fulfillmentLines?: Maybe<Array<FulfillmentLine>>;
+  id: Scalars['ID']['output'];
+  /** The total price of the line excluding tax and discounts. */
+  linePrice: Scalars['Money']['output'];
+  /** The total price of the line including tax but excluding discounts. */
+  linePriceWithTax: Scalars['Money']['output'];
+  /** The total tax on this line */
+  lineTax: Scalars['Money']['output'];
+  order: VendureCart;
+  /** The quantity at the time the Order was placed */
+  orderPlacedQuantity: Scalars['Int']['output'];
+  productVariant: VendureProductVariant;
+  /**
+   * The actual line price, taking into account both item discounts _and_ prorated (proportionally-distributed)
+   * Order-level discounts. This value is the true economic value of the OrderLine, and is used in tax
+   * and refund calculations.
+   */
+  proratedLinePrice: Scalars['Money']['output'];
+  /** The proratedLinePrice including tax */
+  proratedLinePriceWithTax: Scalars['Money']['output'];
+  /**
+   * The actual unit price, taking into account both item discounts _and_ prorated (proportionally-distributed)
+   * Order-level discounts. This value is the true economic value of the OrderItem, and is used in tax
+   * and refund calculations.
+   */
+  proratedUnitPrice: Scalars['Money']['output'];
+  /** The proratedUnitPrice including tax */
+  proratedUnitPriceWithTax: Scalars['Money']['output'];
+  /** The quantity of items purchased */
+  quantity: Scalars['Int']['output'];
+  // taxLines: Array<TaxLine>;
+  taxRate: Scalars['Float']['output'];
+  /** The price of a single unit, excluding tax and discounts */
+  unitPrice: Scalars['Money']['output'];
+  /** Non-zero if the unitPrice has changed since it was initially added to Order */
+  unitPriceChangeSinceAdded: Scalars['Money']['output'];
+  /** The price of a single unit, including tax but excluding discounts */
+  unitPriceWithTax: Scalars['Money']['output'];
+  /** Non-zero if the unitPriceWithTax has changed since it was initially added to Order */
+  unitPriceWithTaxChangeSinceAdded: Scalars['Money']['output'];
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type Cart = Partial<VendureCart> & {

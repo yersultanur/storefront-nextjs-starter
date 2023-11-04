@@ -22,6 +22,15 @@ export const getProductsQuery = /* GraphQL */ `
   ${productFragment}
 `;
 
+export const getProductRecommendationsQuery = /* GraphQL */ `
+  query getProductRecommendations($productId: ID!) {
+    product(id: $productId) {
+      ...product
+    }
+  }
+  ${productFragment}
+`;
+
 export const listedProductFragment = gql`
   fragment ListedProduct on SearchResult {
     productId

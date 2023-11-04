@@ -28,10 +28,13 @@ import {
   VendureProductOption,
   VendureProductVariant,
   VendureProductOptionGroup,
+  VendureProductRecommendationsOperation,
   SearchProductVendure,
   Items,
   ProductCollection,
-  ProductOption
+  ProductOption,
+  CartItem,
+  VendureLineItem
 } from './types';
 import {
   getCollectionProductsQuery,
@@ -45,7 +48,11 @@ import {
   removeFromCartMutation
 } from './providers/mutations/cart';
 import { getCartQuery } from './providers/orders/order';
-import { getProductQuery, getProductsQuery } from './providers/products/products';
+import {
+  getProductQuery,
+  getProductsQuery,
+  getProductRecommendationsQuery
+} from './providers/products/products';
 import Search from 'components/layout/navbar/search';
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
@@ -116,18 +123,79 @@ const removeItems = (array: Items<any>) => {
 
 const reshapeCart = (cart: VendureCart): Cart => {
   const checkoutUrl = `/checkout`;
-
+  const lines = cart?.lines?.map((item) => reshapeLineItem(item)) || [];
+  const totalQuantity = cart.totalQuantity;
+  const currencyCode = cart.currencyCode;
   const cost = {
-    subtotalAmount: cart.subTotal,
-    totalAmount: cart.total,
-    totalTaxAmount: cart.totalWithTax
+    subtotalAmount: {
+      amount: cart.subTotal,
+      currencyCode: currencyCode
+    },
+    totalAmount: {
+      amount: cart.total,
+      currencyCode: currencyCode
+    },
+    totalTaxAmount: {
+      amount: cart.totalWithTax,
+      currencyCode: currencyCode
+    }
   };
 
   return {
     ...cart,
-    lines: cart.lines,
+    totalQuantity,
+    lines,
     checkoutUrl,
     cost
+  };
+};
+
+const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
+  const product = {
+    title: lineItem.productVariant.name,
+    priceRange: {
+      maxVariantPrice: lineItem.productVariant.price
+    },
+    updatedAt: lineItem.updatedAt,
+    createdAt: lineItem.createdAt,
+    tags: [],
+    descriptionHtml: lineItem.productVariant.product.description ?? '',
+    featuredImage: {
+      url: lineItem.featuredAsset?.preview ?? '',
+      altText: lineItem.featuredAsset?.name ?? ''
+    },
+    availableForSale: true,
+    variants: [lineItem.productVariant && reshapeProductVariant(lineItem.productVariant)],
+    handle: lineItem.productVariant?.product?.slug ?? '',
+    options: [] as ProductOption[]
+  };
+
+  const selectedOptions =
+    lineItem.productVariant?.options?.map((option) => ({
+      name: option.name ?? '',
+      value: option.code
+    })) || [];
+
+  const merchandise = {
+    id: lineItem.productVariant.id || lineItem.id,
+    selectedOptions,
+    product,
+    title: lineItem.productVariant.name ?? ''
+  };
+
+  const cost = {
+    totalAmount: {
+      amount: lineItem.productVariant.price,
+      currencyCode: lineItem.productVariant.currencyCode || 'USD'
+    }
+  };
+  const quantity = lineItem.quantity;
+
+  return {
+    ...lineItem,
+    merchandise,
+    cost,
+    quantity
   };
 };
 
@@ -224,18 +292,19 @@ const reshapeProduct = (product: VendureProduct): Product => {
   const variants = product.variants.map((variant) =>
     reshapeProductVariant(variant, product.optionGroups)
   );
-
+  const maxPrice = product.variants?.[0]?.price ?? '';
+  const currencyCode = product.variants?.[0]?.currencyCode?.toUpperCase() ?? '';
   const title = product.name;
   const handle = product.slug;
   const images = reshapeImages(product.assets, title);
   const priceRange = {
     maxVariantPrice: {
-      amount: product.variants ? product.variants.map((variant) => variant.price || '') : [],
-      currencyCode: product.variants?.[0]?.currencyCode?.toUpperCase() ?? ''
+      amount: maxPrice,
+      currencyCode: currencyCode
     },
     minVariantPrice: {
-      amount: product.variants ? product.variants.map((variant) => variant.price || '') : [],
-      currencyCode: product.variants?.[0]?.currencyCode?.toUpperCase() ?? ''
+      amount: maxPrice,
+      currencyCode: currencyCode
     }
   };
   const featuredImageFilename =
@@ -258,12 +327,14 @@ const reshapeProduct = (product: VendureProduct): Product => {
 
   const descriptionHtml = product.description ?? '';
   const availableForSale = true;
+  const id = product.id;
 
   return {
     ...product,
     images,
     variants,
     handle,
+    id,
     priceRange,
     featuredImage,
     descriptionHtml,
@@ -296,11 +367,11 @@ const reshapeCollectionProduct = (product: SearchProductVendure): ProductCollect
   const handle = product.slug;
   const priceRange = {
     maxVariantPrice: {
-      amount: product.price?.max,
+      amount: product.price?.min,
       currencyCode: product.currencyCode?.toUpperCase() ?? ''
     },
     minVariantPrice: {
-      amount: product.price?.min,
+      amount: product.price?.max,
       currencyCode: product.currencyCode?.toUpperCase() ?? ''
     }
   };
@@ -336,14 +407,26 @@ const reshapeCollectionProducts = (products: SearchProductVendure[]) => {
 };
 
 export async function createCart(): Promise<Cart> {
-  const res = await vendureFetch<VendureCreateCartOperation>({
-    query: createCartMutation,
-    cache: 'no-store'
-  });
-
-  const cart = res.body.data.addItemToOrder.cart;
-
-  return reshapeCart(cart);
+  return {
+    id: '',
+    checkoutUrl: '',
+    cost: {
+      subtotalAmount: {
+        amount: '',
+        currencyCode: ''
+      },
+      totalAmount: {
+        amount: '',
+        currencyCode: ''
+      },
+      totalTaxAmount: {
+        amount: '',
+        currencyCode: ''
+      }
+    },
+    lines: [],
+    totalQuantity: 0
+  };
 }
 
 export async function addToCart(
@@ -503,7 +586,7 @@ export async function getProductRecommendations(productId: string): Promise<Prod
     }
   });
 
-  return reshapeProducts(res.body.data.productRecommendations);
+  return reshapeProducts(res.body.data.product);
 }
 
 export async function getProducts({
