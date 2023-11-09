@@ -76,9 +76,7 @@ type Tag = {
   value: string;
 };
 
-export type Product = Partial<
-  Omit<VendureProduct, 'variants' | 'assets' | 'images' | 'options' | 'tags'>
-> & {
+export type Product = Partial<Omit<VendureProduct, 'variants' | 'options' | 'tags'>> & {
   title: string;
   variants: ProductVariant[];
   images: Image[];
@@ -256,9 +254,7 @@ export type VendureCollectionOperation = {
 
 export type VendureAddToCartOperation = {
   data: {
-    addItemToOrder: {
-      cart: VendureCart;
-    };
+    addItemToOrder: VendureCart;
   };
   variables: {
     cartId: string;
@@ -272,29 +268,20 @@ export type VendureCreateCartOperation = {
 
 export type VendureRemoveFromCartOperation = {
   data: {
-    cartLinesRemove: {
-      cart: VendureCart;
-    };
+    removeOrderLine: VendureCart;
   };
   variables: {
-    cartId: string;
-    lineIds: string[];
+    lineIds: string;
   };
 };
 
 export type VendureUpdateCartOperation = {
   data: {
-    cartLinesUpdate: {
-      cart: VendureCart;
-    };
+    adjustOrderLine: VendureCart;
   };
   variables: {
-    cartId: string;
-    lines: {
-      id: string;
-      merchandiseId: string;
-      quantity: number;
-    }[];
+    lineIds: string;
+    quantity: number;
   };
 };
 
@@ -312,10 +299,7 @@ export type VendureCollectionProductsOperation = {
 
 export type VendureCartOperation = {
   data: {
-    cart: VendureCart;
-  };
-  variables: {
-    cartId: string;
+    activeOrder: VendureCart;
   };
 };
 
@@ -380,7 +364,7 @@ export type ShippingAddress = {
   country?: string;
 };
 
-export type ProductVariant = Omit<VendureProductVariant, 'price' | 'name'> & {
+export type ProductVariant = VendureProductVariant & {
   name: string;
   availableForSale: boolean;
   selectedOptions: SelectedOption[];
@@ -522,6 +506,7 @@ export type VendureLineItem = {
 };
 
 export type Cart = Partial<VendureCart> & {
+  id: string;
   lines: CartItem[];
   checkoutUrl: string;
   totalQuantity: number;

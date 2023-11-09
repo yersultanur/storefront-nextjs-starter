@@ -53,34 +53,45 @@ import {
   getProductsQuery,
   getProductRecommendationsQuery
 } from './providers/products/products';
-import Search from 'components/layout/navbar/search';
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
 const key = process.env.VENDURE_API_KEY ?? `auth_token`;
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
+const AUTH_TOKEN_KEY = 'auth_token';
+const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
+let channelToken: string;
+
+export function setChannelToken(value: string) {
+  channelToken = value;
+}
 
 export async function vendureFetch<T>({
   cache = 'force-cache',
-  headers,
   query,
   tags,
   variables
 }: {
   cache?: RequestCache;
-  headers?: HeadersInit;
   query: string;
   tags?: string[];
   variables?: Record<string, any>;
 }): Promise<{ status: number; body: T } | never> {
   try {
+    const headers = new Headers({
+      'content-type': 'application/json'
+    });
+
+    if (authToken) {
+      headers.append('authorization', `Bearer ${authToken}`);
+    }
+    if (channelToken) {
+      headers.append('vendure-token', channelToken);
+    }
+
     const result = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${key}`,
-        ...headers
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify({
         ...(query && { query }),
@@ -124,25 +135,27 @@ const removeItems = (array: Items<any>) => {
 const reshapeCart = (cart: VendureCart): Cart => {
   const checkoutUrl = `/checkout`;
   const lines = cart?.lines?.map((item) => reshapeLineItem(item)) || [];
-  const totalQuantity = cart.totalQuantity;
-  const currencyCode = cart.currencyCode;
+  const totalQuantity = cart?.totalQuantity ?? 0;
+  const currencyCode = cart?.currencyCode || 'USD';
   const cost = {
     subtotalAmount: {
-      amount: cart.subTotal,
+      amount: cart?.subTotal || '0',
       currencyCode: currencyCode
     },
     totalAmount: {
-      amount: cart.total,
+      amount: cart?.total || '0',
       currencyCode: currencyCode
     },
     totalTaxAmount: {
-      amount: cart.totalWithTax,
+      amount: cart?.totalWithTax || '0',
       currencyCode: currencyCode
     }
   };
+  const id = cart?.id;
 
   return {
     ...cart,
+    id,
     totalQuantity,
     lines,
     checkoutUrl,
@@ -151,10 +164,17 @@ const reshapeCart = (cart: VendureCart): Cart => {
 };
 
 const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
-  const product = {
+  const product: Product = {
     title: lineItem.productVariant.name,
     priceRange: {
-      maxVariantPrice: lineItem.productVariant.price
+      maxVariantPrice: {
+        amount: lineItem.productVariant.price,
+        currencyCode: lineItem.productVariant.currencyCode
+      },
+      minVariantPrice: {
+        amount: lineItem.productVariant.price,
+        currencyCode: lineItem.productVariant.currencyCode
+      }
     },
     updatedAt: lineItem.updatedAt,
     createdAt: lineItem.createdAt,
@@ -167,7 +187,12 @@ const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
     availableForSale: true,
     variants: [lineItem.productVariant && reshapeProductVariant(lineItem.productVariant)],
     handle: lineItem.productVariant?.product?.slug ?? '',
-    options: [] as ProductOption[]
+    options: [] as ProductOption[],
+    images: reshapeImages(lineItem.productVariant.product.assets),
+    seo: {
+      title: lineItem.productVariant.name,
+      description: lineItem.productVariant.product.description
+    }
   };
 
   const selectedOptions =
@@ -190,9 +215,11 @@ const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
     }
   };
   const quantity = lineItem.quantity;
+  const id = lineItem.id;
 
   return {
     ...lineItem,
+    id,
     merchandise,
     cost,
     quantity
@@ -429,64 +456,62 @@ export async function createCart(): Promise<Cart> {
   };
 }
 
-export async function addToCart(
-  cartId: string,
-  lines: { merchandiseId: string; quantity: number }[]
-): Promise<Cart> {
+export async function addToCart(lines: { merchandiseId: string; quantity: number }): Promise<Cart> {
   const res = await vendureFetch<VendureAddToCartOperation>({
     query: addToCartMutation,
     variables: {
-      cartId,
-      lines
+      cartId: lines.merchandiseId,
+      quantity: lines.quantity
     },
     cache: 'no-store'
   });
-  return reshapeCart(res.body.data.addItemToOrder.cart);
+
+  return reshapeCart(res.body.data.addItemToOrder);
 }
 
-export async function removeFromCart(cartId: string, lineIds: string[]): Promise<Cart> {
+export async function removeFromCart(lineIds: string[]): Promise<Cart> {
   const res = await vendureFetch<VendureRemoveFromCartOperation>({
     query: removeFromCartMutation,
     variables: {
-      cartId,
       lineIds
     },
     cache: 'no-store'
   });
 
-  return reshapeCart(res.body.data.cartLinesRemove.cart);
+  return reshapeCart(res.body.data.removeOrderLine);
 }
 
-export async function updateCart(
-  cartId: string,
-  lines: { id: string; merchandiseId: string; quantity: number }[]
-): Promise<Cart> {
+export async function updateCart(lines: {
+  id: string;
+  merchandiseId: string;
+  quantity: number;
+}): Promise<Cart> {
   const res = await vendureFetch<VendureUpdateCartOperation>({
     query: editCartItemsMutation,
     variables: {
-      cartId,
-      lines
+      lineIds: lines.id,
+      quantity: lines.quantity
     },
     cache: 'no-store'
   });
 
-  return reshapeCart(res.body.data.cartLinesUpdate.cart);
+  return reshapeCart(res.body.data.adjustOrderLine);
 }
 
-export async function getCart(cartId: string): Promise<Cart | undefined> {
+export async function getCart(): Promise<Cart | undefined> {
   const res = await vendureFetch<VendureCartOperation>({
     query: getCartQuery,
-    variables: { cartId },
     tags: [TAGS.cart],
     cache: 'no-store'
   });
 
-  // Old carts becomes `null` when you checkout.
-  if (!res.body.data.cart) {
+  if (!res.body.data.activeOrder) {
     return undefined;
   }
 
-  return reshapeCart(res.body.data.cart);
+  const cart = res.body.data.activeOrder;
+  console.log(res.body.data.activeOrder);
+  return reshapeCart(cart);
 }
 
 export async function getCollection(handle: string): Promise<Collection | undefined> {

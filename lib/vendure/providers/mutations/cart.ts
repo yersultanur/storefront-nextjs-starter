@@ -33,8 +33,8 @@ export const createCartMutation = /* GraphQL */ `
 `;
 
 export const editCartItemsMutation = /* GraphQL */ `
-  mutation editCartItems($orderLineId: ID!, $quantity: Int!) {
-    adjustOrderLine(orderLineId: $orderLineId, quantity: $quantity) {
+  mutation editCartItems($lineIds: ID!, $quantity: Int!) {
+    adjustOrderLine(orderLineId: $lineIds, quantity: $quantity) {
       ...cart
       ... on ErrorResult {
         errorCode
@@ -46,8 +46,8 @@ export const editCartItemsMutation = /* GraphQL */ `
 `;
 
 export const removeFromCartMutation = /* GraphQL */ `
-  mutation removeFromCart($orderLineId: ID!) {
-    removeOrderLine(orderLineId: $orderLineId) {
+  mutation removeFromCart($lineIds: ID!) {
+    removeOrderLine(orderLineId: $lineIds) {
       ...cart
       ... on ErrorResult {
         errorCode
