@@ -56,42 +56,38 @@ import {
 
 const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
 const key = process.env.VENDURE_API_KEY ?? `auth_token`;
+const AUTH_TOKEN_KEY = 'token';
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
-const AUTH_TOKEN_KEY = 'auth_token';
-const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
-let channelToken: string;
-
-export function setChannelToken(value: string) {
-  channelToken = value;
-}
 
 export async function vendureFetch<T>({
   cache = 'force-cache',
+  headers,
   query,
   tags,
   variables
 }: {
   cache?: RequestCache;
+  headers?: HeadersInit;
   query: string;
   tags?: string[];
   variables?: Record<string, any>;
 }): Promise<{ status: number; body: T } | never> {
+  let authToken = '';
+
+  // Check if running in a browser environment before using localStorage
+  if (typeof window !== 'undefined') {
+    authToken = localStorage.getItem(AUTH_TOKEN_KEY) || '';
+  }
+
   try {
-    const headers = new Headers({
-      'content-type': 'application/json'
-    });
-
-    if (authToken) {
-      headers.append('authorization', `Bearer ${authToken}`);
-    }
-    if (channelToken) {
-      headers.append('vendure-token', channelToken);
-    }
-
     const result = await fetch(endpoint, {
       method: 'POST',
-      headers,
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${authToken}`,
+        ...headers
+      },
       credentials: 'include',
       body: JSON.stringify({
         ...(query && { query }),
