@@ -53,10 +53,22 @@ import {
   getProductsQuery,
   getProductRecommendationsQuery
 } from './providers/products/products';
+import { getToken } from 'next-auth/jwt';
+import Cookies from 'js-cookie';
 
-const endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
-const key = process.env.VENDURE_API_KEY ?? `auth_token`;
-const AUTH_TOKEN_KEY = 'token';
+let endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
+const key = process.env.VENDURE_API_KEY ?? `o6pez4wgv1`;
+const AUTH_TOKEN_KEY = 'auth_token';
+let languageCode: string | undefined;
+let channelToken: string | undefined;
+
+export function setLanguageCode(value: string | undefined) {
+  languageCode = value;
+}
+
+export function setChannelToken(value: string | undefined) {
+  channelToken = value;
+}
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
 
@@ -73,21 +85,23 @@ export async function vendureFetch<T>({
   tags?: string[];
   variables?: Record<string, any>;
 }): Promise<{ status: number; body: T } | never> {
-  let authToken = '';
-
-  // Check if running in a browser environment before using localStorage
-  if (typeof window !== 'undefined') {
-    authToken = localStorage.getItem(AUTH_TOKEN_KEY) || '';
-  }
-
   try {
+    const authToken = typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+    const headers = new Headers({
+      'content-type': 'application/json'
+    });
+    if (authToken) {
+      headers.append('authorization', `Bearer ${authToken}`);
+    }
+    if (channelToken) {
+      headers.append('vendure-token', channelToken);
+    }
+    if (languageCode) {
+      endpoint += `?languageCode=${languageCode}`;
+    }
     const result = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${authToken}`,
-        ...headers
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify({
         ...(query && { query }),
@@ -96,6 +110,12 @@ export async function vendureFetch<T>({
       cache,
       ...(tags && { next: { tags } })
     });
+
+    const newAuthToken = result.headers.get('vendure-auth-token');
+
+    if (typeof window !== 'undefined' && newAuthToken) {
+      localStorage.setItem(AUTH_TOKEN_KEY, newAuthToken);
+    }
 
     const body = await result.json();
 
@@ -135,15 +155,15 @@ const reshapeCart = (cart: VendureCart): Cart => {
   const currencyCode = cart?.currencyCode || 'USD';
   const cost = {
     subtotalAmount: {
-      amount: cart?.subTotal || '0',
+      amount: cart?.subTotal ?? '0',
       currencyCode: currencyCode
     },
     totalAmount: {
-      amount: cart?.total || '0',
+      amount: cart?.total ?? '0',
       currencyCode: currencyCode
     },
     totalTaxAmount: {
-      amount: cart?.totalWithTax || '0',
+      amount: cart?.totalWithTax ?? '0',
       currencyCode: currencyCode
     }
   };
@@ -198,7 +218,7 @@ const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
     })) || [];
 
   const merchandise = {
-    id: lineItem.productVariant.id || lineItem.id,
+    id: lineItem.productVariant.id ?? lineItem.id,
     selectedOptions,
     product,
     title: lineItem.productVariant.name ?? ''
@@ -207,7 +227,7 @@ const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
   const cost = {
     totalAmount: {
       amount: lineItem.productVariant.price,
-      currencyCode: lineItem.productVariant.currencyCode || 'USD'
+      currencyCode: lineItem.productVariant.currencyCode ?? 'USD'
     }
   };
   const quantity = lineItem.quantity;
@@ -227,8 +247,8 @@ const reshapeCollection = (collection: VendureCollection): Collection => {
   const title = collection.name;
   const description = collection.description;
   const seo = {
-    title: collection.name || '',
-    description: collection.description || ''
+    title: collection.name ?? '',
+    description: collection.description ?? ''
   };
   const updatedAt = collection.updatedAt;
 
@@ -494,7 +514,7 @@ export async function updateCart(lines: {
   return reshapeCart(res.body.data.adjustOrderLine);
 }
 
-export async function getCart(): Promise<Cart | undefined> {
+export async function getCart(): Promise<Cart | null> {
   const res = await vendureFetch<VendureCartOperation>({
     query: getCartQuery,
     tags: [TAGS.cart],
@@ -502,11 +522,11 @@ export async function getCart(): Promise<Cart | undefined> {
   });
 
   if (!res.body.data.activeOrder) {
-    return undefined;
+    return null;
   }
 
-  const cart = res.body.data.activeOrder;
-  console.log(res.body.data.activeOrder);
+  const cart = res.body.data.activeOrder.cart;
+  console.log(res.body.data.activeOrder.cart);
   return reshapeCart(cart);
 }
 

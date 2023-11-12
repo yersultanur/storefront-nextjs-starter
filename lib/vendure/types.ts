@@ -299,7 +299,9 @@ export type VendureCollectionProductsOperation = {
 
 export type VendureCartOperation = {
   data: {
-    activeOrder: VendureCart;
+    activeOrder: {
+      cart: VendureCart;
+    };
   };
 };
 

@@ -28,7 +28,9 @@
     "clsx": "^2.0.0",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
+    "js-cookie": "^3.0.5",
     "next": "13.5.4",
+    "next-auth": "^4.24.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -42,6 +44,7 @@
     "@graphql-codegen/typescript-operations": "^4.0.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.10",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "20.6.5",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",

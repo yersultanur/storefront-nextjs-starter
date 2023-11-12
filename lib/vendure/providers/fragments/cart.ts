@@ -2,7 +2,6 @@ import productFragment from './product';
 
 const cartFragment = /* GraphQL */ `
   fragment cart on Order {
-    __typename
     id
     code
     active
@@ -45,20 +44,34 @@ const cartFragment = /* GraphQL */ `
     }
     lines {
       id
+      createdAt
+      updatedAt
       unitPriceWithTax
       linePriceWithTax
       quantity
       featuredAsset {
         id
+        name
         preview
       }
       productVariant {
         id
         name
         price
+        currencyCode
         product {
+          ...product
+        }
+        options {
           id
-          slug
+          group {
+            id
+            name
+            code
+          }
+          groupId
+          name
+          code
         }
       }
     }
@@ -70,6 +83,7 @@ const cartFragment = /* GraphQL */ `
       metadata
     }
   }
+  ${productFragment}
 `;
 
 export default cartFragment;

@@ -3695,7 +3695,7 @@ export type ActiveCustomerOrderListQuery = {
 };
 
 export type CartFragment = {
-  __typename: 'Order';
+  __typename?: 'Order';
   id: string;
   code: string;
   active: boolean;
@@ -3740,16 +3740,64 @@ export type CartFragment = {
   lines: Array<{
     __typename?: 'OrderLine';
     id: string;
+    createdAt: any;
+    updatedAt: any;
     unitPriceWithTax: number;
     linePriceWithTax: number;
     quantity: number;
-    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+    featuredAsset?: { __typename?: 'Asset'; id: string; name: string; preview: string } | null;
     productVariant: {
       __typename?: 'ProductVariant';
       id: string;
       name: string;
       price: number;
-      product: { __typename?: 'Product'; id: string; slug: string };
+      currencyCode: CurrencyCode;
+      product: {
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        description: string;
+        updatedAt: any;
+        facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+        optionGroups: Array<{
+          __typename?: 'ProductOptionGroup';
+          name: string;
+          code: string;
+          options: Array<{ __typename?: 'ProductOption'; id: string; name: string; code: string }>;
+        }>;
+        variants: Array<{
+          __typename?: 'ProductVariant';
+          id: string;
+          name: string;
+          price: number;
+          currencyCode: CurrencyCode;
+          options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+        }>;
+        featuredAsset?: {
+          __typename?: 'Asset';
+          id: string;
+          preview: string;
+          name: string;
+          width: number;
+          height: number;
+        } | null;
+        assets: Array<{
+          __typename?: 'Asset';
+          id: string;
+          preview: string;
+          name: string;
+          width: number;
+          height: number;
+        }>;
+      };
+      options: Array<{
+        __typename?: 'ProductOption';
+        id: string;
+        groupId: string;
+        name: string;
+        code: string;
+        group: { __typename?: 'ProductOptionGroup'; id: string; name: string; code: string };
+      }>;
     };
   }>;
   payments?: Array<{
@@ -3832,7 +3880,7 @@ export type AddToCartMutation = {
         message: string;
         quantityAvailable: number;
         order: {
-          __typename: 'Order';
+          __typename?: 'Order';
           id: string;
           code: string;
           active: boolean;
@@ -3877,16 +3925,79 @@ export type AddToCartMutation = {
           lines: Array<{
             __typename?: 'OrderLine';
             id: string;
+            createdAt: any;
+            updatedAt: any;
             unitPriceWithTax: number;
             linePriceWithTax: number;
             quantity: number;
-            featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+            featuredAsset?: {
+              __typename?: 'Asset';
+              id: string;
+              name: string;
+              preview: string;
+            } | null;
             productVariant: {
               __typename?: 'ProductVariant';
               id: string;
               name: string;
               price: number;
-              product: { __typename?: 'Product'; id: string; slug: string };
+              currencyCode: CurrencyCode;
+              product: {
+                __typename?: 'Product';
+                id: string;
+                name: string;
+                description: string;
+                updatedAt: any;
+                facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+                optionGroups: Array<{
+                  __typename?: 'ProductOptionGroup';
+                  name: string;
+                  code: string;
+                  options: Array<{
+                    __typename?: 'ProductOption';
+                    id: string;
+                    name: string;
+                    code: string;
+                  }>;
+                }>;
+                variants: Array<{
+                  __typename?: 'ProductVariant';
+                  id: string;
+                  name: string;
+                  price: number;
+                  currencyCode: CurrencyCode;
+                  options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+                }>;
+                featuredAsset?: {
+                  __typename?: 'Asset';
+                  id: string;
+                  preview: string;
+                  name: string;
+                  width: number;
+                  height: number;
+                } | null;
+                assets: Array<{
+                  __typename?: 'Asset';
+                  id: string;
+                  preview: string;
+                  name: string;
+                  width: number;
+                  height: number;
+                }>;
+              };
+              options: Array<{
+                __typename?: 'ProductOption';
+                id: string;
+                groupId: string;
+                name: string;
+                code: string;
+                group: {
+                  __typename?: 'ProductOptionGroup';
+                  id: string;
+                  name: string;
+                  code: string;
+                };
+              }>;
             };
           }>;
           payments?: Array<{
@@ -3901,7 +4012,7 @@ export type AddToCartMutation = {
       }
     | { __typename?: 'NegativeQuantityError'; errorCode: ErrorCode; message: string }
     | {
-        __typename: 'Order';
+        __typename?: 'Order';
         id: string;
         code: string;
         active: boolean;
@@ -3946,16 +4057,74 @@ export type AddToCartMutation = {
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
+          createdAt: any;
+          updatedAt: any;
           unitPriceWithTax: number;
           linePriceWithTax: number;
           quantity: number;
-          featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+          featuredAsset?: {
+            __typename?: 'Asset';
+            id: string;
+            name: string;
+            preview: string;
+          } | null;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
             name: string;
             price: number;
-            product: { __typename?: 'Product'; id: string; slug: string };
+            currencyCode: CurrencyCode;
+            product: {
+              __typename?: 'Product';
+              id: string;
+              name: string;
+              description: string;
+              updatedAt: any;
+              facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+              optionGroups: Array<{
+                __typename?: 'ProductOptionGroup';
+                name: string;
+                code: string;
+                options: Array<{
+                  __typename?: 'ProductOption';
+                  id: string;
+                  name: string;
+                  code: string;
+                }>;
+              }>;
+              variants: Array<{
+                __typename?: 'ProductVariant';
+                id: string;
+                name: string;
+                price: number;
+                currencyCode: CurrencyCode;
+                options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+              }>;
+              featuredAsset?: {
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              } | null;
+              assets: Array<{
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              }>;
+            };
+            options: Array<{
+              __typename?: 'ProductOption';
+              id: string;
+              groupId: string;
+              name: string;
+              code: string;
+              group: { __typename?: 'ProductOptionGroup'; id: string; name: string; code: string };
+            }>;
           };
         }>;
         payments?: Array<{
@@ -3982,7 +4151,7 @@ export type CreateCartMutation = {
     | { __typename?: 'InsufficientStockError'; errorCode: ErrorCode; message: string }
     | { __typename?: 'NegativeQuantityError'; errorCode: ErrorCode; message: string }
     | {
-        __typename: 'Order';
+        __typename?: 'Order';
         id: string;
         code: string;
         active: boolean;
@@ -4027,16 +4196,74 @@ export type CreateCartMutation = {
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
+          createdAt: any;
+          updatedAt: any;
           unitPriceWithTax: number;
           linePriceWithTax: number;
           quantity: number;
-          featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+          featuredAsset?: {
+            __typename?: 'Asset';
+            id: string;
+            name: string;
+            preview: string;
+          } | null;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
             name: string;
             price: number;
-            product: { __typename?: 'Product'; id: string; slug: string };
+            currencyCode: CurrencyCode;
+            product: {
+              __typename?: 'Product';
+              id: string;
+              name: string;
+              description: string;
+              updatedAt: any;
+              facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+              optionGroups: Array<{
+                __typename?: 'ProductOptionGroup';
+                name: string;
+                code: string;
+                options: Array<{
+                  __typename?: 'ProductOption';
+                  id: string;
+                  name: string;
+                  code: string;
+                }>;
+              }>;
+              variants: Array<{
+                __typename?: 'ProductVariant';
+                id: string;
+                name: string;
+                price: number;
+                currencyCode: CurrencyCode;
+                options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+              }>;
+              featuredAsset?: {
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              } | null;
+              assets: Array<{
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              }>;
+            };
+            options: Array<{
+              __typename?: 'ProductOption';
+              id: string;
+              groupId: string;
+              name: string;
+              code: string;
+              group: { __typename?: 'ProductOptionGroup'; id: string; name: string; code: string };
+            }>;
           };
         }>;
         payments?: Array<{
@@ -4063,7 +4290,7 @@ export type EditCartItemsMutation = {
     | { __typename?: 'InsufficientStockError'; errorCode: ErrorCode; message: string }
     | { __typename?: 'NegativeQuantityError'; errorCode: ErrorCode; message: string }
     | {
-        __typename: 'Order';
+        __typename?: 'Order';
         id: string;
         code: string;
         active: boolean;
@@ -4108,16 +4335,74 @@ export type EditCartItemsMutation = {
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
+          createdAt: any;
+          updatedAt: any;
           unitPriceWithTax: number;
           linePriceWithTax: number;
           quantity: number;
-          featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+          featuredAsset?: {
+            __typename?: 'Asset';
+            id: string;
+            name: string;
+            preview: string;
+          } | null;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
             name: string;
             price: number;
-            product: { __typename?: 'Product'; id: string; slug: string };
+            currencyCode: CurrencyCode;
+            product: {
+              __typename?: 'Product';
+              id: string;
+              name: string;
+              description: string;
+              updatedAt: any;
+              facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+              optionGroups: Array<{
+                __typename?: 'ProductOptionGroup';
+                name: string;
+                code: string;
+                options: Array<{
+                  __typename?: 'ProductOption';
+                  id: string;
+                  name: string;
+                  code: string;
+                }>;
+              }>;
+              variants: Array<{
+                __typename?: 'ProductVariant';
+                id: string;
+                name: string;
+                price: number;
+                currencyCode: CurrencyCode;
+                options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+              }>;
+              featuredAsset?: {
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              } | null;
+              assets: Array<{
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              }>;
+            };
+            options: Array<{
+              __typename?: 'ProductOption';
+              id: string;
+              groupId: string;
+              name: string;
+              code: string;
+              group: { __typename?: 'ProductOptionGroup'; id: string; name: string; code: string };
+            }>;
           };
         }>;
         payments?: Array<{
@@ -4141,7 +4426,7 @@ export type RemoveFromCartMutation = {
   __typename?: 'Mutation';
   removeOrderLine:
     | {
-        __typename: 'Order';
+        __typename?: 'Order';
         id: string;
         code: string;
         active: boolean;
@@ -4186,16 +4471,74 @@ export type RemoveFromCartMutation = {
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
+          createdAt: any;
+          updatedAt: any;
           unitPriceWithTax: number;
           linePriceWithTax: number;
           quantity: number;
-          featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+          featuredAsset?: {
+            __typename?: 'Asset';
+            id: string;
+            name: string;
+            preview: string;
+          } | null;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
             name: string;
             price: number;
-            product: { __typename?: 'Product'; id: string; slug: string };
+            currencyCode: CurrencyCode;
+            product: {
+              __typename?: 'Product';
+              id: string;
+              name: string;
+              description: string;
+              updatedAt: any;
+              facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+              optionGroups: Array<{
+                __typename?: 'ProductOptionGroup';
+                name: string;
+                code: string;
+                options: Array<{
+                  __typename?: 'ProductOption';
+                  id: string;
+                  name: string;
+                  code: string;
+                }>;
+              }>;
+              variants: Array<{
+                __typename?: 'ProductVariant';
+                id: string;
+                name: string;
+                price: number;
+                currencyCode: CurrencyCode;
+                options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+              }>;
+              featuredAsset?: {
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              } | null;
+              assets: Array<{
+                __typename?: 'Asset';
+                id: string;
+                preview: string;
+                name: string;
+                width: number;
+                height: number;
+              }>;
+            };
+            options: Array<{
+              __typename?: 'ProductOption';
+              id: string;
+              groupId: string;
+              name: string;
+              code: string;
+              group: { __typename?: 'ProductOptionGroup'; id: string; name: string; code: string };
+            }>;
           };
         }>;
         payments?: Array<{
@@ -4215,7 +4558,7 @@ export type GetCartQueryQueryVariables = Exact<{ [key: string]: never }>;
 export type GetCartQueryQuery = {
   __typename?: 'Query';
   activeOrder?: {
-    __typename: 'Order';
+    __typename?: 'Order';
     id: string;
     code: string;
     active: boolean;
@@ -4260,16 +4603,69 @@ export type GetCartQueryQuery = {
     lines: Array<{
       __typename?: 'OrderLine';
       id: string;
+      createdAt: any;
+      updatedAt: any;
       unitPriceWithTax: number;
       linePriceWithTax: number;
       quantity: number;
-      featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+      featuredAsset?: { __typename?: 'Asset'; id: string; name: string; preview: string } | null;
       productVariant: {
         __typename?: 'ProductVariant';
         id: string;
         name: string;
         price: number;
-        product: { __typename?: 'Product'; id: string; slug: string };
+        currencyCode: CurrencyCode;
+        product: {
+          __typename?: 'Product';
+          id: string;
+          name: string;
+          description: string;
+          updatedAt: any;
+          facetValues: Array<{ __typename?: 'FacetValue'; name: string; code: string }>;
+          optionGroups: Array<{
+            __typename?: 'ProductOptionGroup';
+            name: string;
+            code: string;
+            options: Array<{
+              __typename?: 'ProductOption';
+              id: string;
+              name: string;
+              code: string;
+            }>;
+          }>;
+          variants: Array<{
+            __typename?: 'ProductVariant';
+            id: string;
+            name: string;
+            price: number;
+            currencyCode: CurrencyCode;
+            options: Array<{ __typename?: 'ProductOption'; name: string; code: string }>;
+          }>;
+          featuredAsset?: {
+            __typename?: 'Asset';
+            id: string;
+            preview: string;
+            name: string;
+            width: number;
+            height: number;
+          } | null;
+          assets: Array<{
+            __typename?: 'Asset';
+            id: string;
+            preview: string;
+            name: string;
+            width: number;
+            height: number;
+          }>;
+        };
+        options: Array<{
+          __typename?: 'ProductOption';
+          id: string;
+          groupId: string;
+          name: string;
+          code: string;
+          group: { __typename?: 'ProductOptionGroup'; id: string; name: string; code: string };
+        }>;
       };
     }>;
     payments?: Array<{
@@ -4424,73 +4820,6 @@ export type GetProductRecommendationsQuery = {
   } | null;
 };
 
-export type ListedProductFragment = {
-  __typename?: 'SearchResult';
-  productId: string;
-  productName: string;
-  slug: string;
-  currencyCode: CurrencyCode;
-  productAsset?: { __typename?: 'SearchResultAsset'; id: string; preview: string } | null;
-  priceWithTax:
-    | { __typename?: 'PriceRange'; min: number; max: number }
-    | { __typename?: 'SinglePrice'; value: number };
-};
-
-export type SearchQueryVariables = Exact<{
-  input: SearchInput;
-}>;
-
-export type SearchQuery = {
-  __typename?: 'Query';
-  search: {
-    __typename?: 'SearchResponse';
-    totalItems: number;
-    items: Array<{
-      __typename?: 'SearchResult';
-      productId: string;
-      productName: string;
-      slug: string;
-      currencyCode: CurrencyCode;
-      productAsset?: { __typename?: 'SearchResultAsset'; id: string; preview: string } | null;
-      priceWithTax:
-        | { __typename?: 'PriceRange'; min: number; max: number }
-        | { __typename?: 'SinglePrice'; value: number };
-    }>;
-    facetValues: Array<{
-      __typename?: 'FacetValueResult';
-      count: number;
-      facetValue: {
-        __typename?: 'FacetValue';
-        id: string;
-        name: string;
-        facet: { __typename?: 'Facet'; id: string; name: string };
-      };
-    }>;
-  };
-};
-
-export type SearchFacetValuesQueryVariables = Exact<{
-  input: SearchInput;
-}>;
-
-export type SearchFacetValuesQuery = {
-  __typename?: 'Query';
-  search: {
-    __typename?: 'SearchResponse';
-    totalItems: number;
-    facetValues: Array<{
-      __typename?: 'FacetValueResult';
-      count: number;
-      facetValue: {
-        __typename?: 'FacetValue';
-        id: string;
-        name: string;
-        facet: { __typename?: 'Facet'; id: string; name: string };
-      };
-    }>;
-  };
-};
-
 export const SeoCollectionFragmentDoc = gql`
   fragment seoCollection on Collection {
     description
@@ -4506,77 +4835,6 @@ export const CollectionFragmentDoc = gql`
     updatedAt
   }
   ${SeoCollectionFragmentDoc}
-`;
-export const CartFragmentDoc = gql`
-  fragment cart on Order {
-    __typename
-    id
-    code
-    active
-    createdAt
-    state
-    currencyCode
-    totalQuantity
-    subTotal
-    subTotalWithTax
-    taxSummary {
-      description
-      taxRate
-      taxTotal
-    }
-    shippingWithTax
-    totalWithTax
-    customer {
-      id
-      firstName
-      lastName
-      emailAddress
-    }
-    shippingAddress {
-      fullName
-      streetLine1
-      streetLine2
-      company
-      city
-      province
-      postalCode
-      countryCode
-      phoneNumber
-    }
-    shippingLines {
-      shippingMethod {
-        id
-        name
-      }
-      priceWithTax
-    }
-    lines {
-      id
-      unitPriceWithTax
-      linePriceWithTax
-      quantity
-      featuredAsset {
-        id
-        preview
-      }
-      productVariant {
-        id
-        name
-        price
-        product {
-          id
-          slug
-        }
-      }
-    }
-    payments {
-      id
-      state
-      method
-      amount
-      metadata
-    }
-  }
 `;
 export const ImageFragmentDoc = gql`
   fragment image on Asset {
@@ -4633,26 +4891,90 @@ export const ProductFragmentDoc = gql`
   ${ImageFragmentDoc}
   ${SeoProductFragmentDoc}
 `;
-export const ListedProductFragmentDoc = gql`
-  fragment ListedProduct on SearchResult {
-    productId
-    productName
-    slug
-    productAsset {
-      id
-      preview
-    }
+export const CartFragmentDoc = gql`
+  fragment cart on Order {
+    id
+    code
+    active
+    createdAt
+    state
     currencyCode
-    priceWithTax {
-      ... on PriceRange {
-        min
-        max
+    totalQuantity
+    subTotal
+    subTotalWithTax
+    taxSummary {
+      description
+      taxRate
+      taxTotal
+    }
+    shippingWithTax
+    totalWithTax
+    customer {
+      id
+      firstName
+      lastName
+      emailAddress
+    }
+    shippingAddress {
+      fullName
+      streetLine1
+      streetLine2
+      company
+      city
+      province
+      postalCode
+      countryCode
+      phoneNumber
+    }
+    shippingLines {
+      shippingMethod {
+        id
+        name
       }
-      ... on SinglePrice {
-        value
+      priceWithTax
+    }
+    lines {
+      id
+      createdAt
+      updatedAt
+      unitPriceWithTax
+      linePriceWithTax
+      quantity
+      featuredAsset {
+        id
+        name
+        preview
       }
+      productVariant {
+        id
+        name
+        price
+        currencyCode
+        product {
+          ...product
+        }
+        options {
+          id
+          group {
+            id
+            name
+            code
+          }
+          groupId
+          name
+          code
+        }
+      }
+    }
+    payments {
+      id
+      state
+      method
+      amount
+      metadata
     }
   }
+  ${ProductFragmentDoc}
 `;
 export const LoginDocument = gql`
   mutation login($email: String!, $password: String!, $rememberMe: Boolean) {
@@ -5021,46 +5343,6 @@ export const GetProductRecommendationsDocument = gql`
   }
   ${ProductFragmentDoc}
 `;
-export const SearchDocument = gql`
-  query search($input: SearchInput!) {
-    search(input: $input) {
-      totalItems
-      items {
-        ...ListedProduct
-      }
-      facetValues {
-        count
-        facetValue {
-          id
-          name
-          facet {
-            id
-            name
-          }
-        }
-      }
-    }
-  }
-  ${ListedProductFragmentDoc}
-`;
-export const SearchFacetValuesDocument = gql`
-  query searchFacetValues($input: SearchInput!) {
-    search(input: $input) {
-      totalItems
-      facetValues {
-        count
-        facetValue {
-          id
-          name
-          facet {
-            id
-            name
-          }
-        }
-      }
-    }
-  }
-`;
 export type Requester<C = {}, E = unknown> = <R, V>(
   doc: DocumentNode,
   vars?: V,
@@ -5322,23 +5604,6 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
         variables,
         options
       ) as Promise<GetProductRecommendationsQuery>;
-    },
-    search(variables: SearchQueryVariables, options?: C): Promise<SearchQuery> {
-      return requester<SearchQuery, SearchQueryVariables>(
-        SearchDocument,
-        variables,
-        options
-      ) as Promise<SearchQuery>;
-    },
-    searchFacetValues(
-      variables: SearchFacetValuesQueryVariables,
-      options?: C
-    ): Promise<SearchFacetValuesQuery> {
-      return requester<SearchFacetValuesQuery, SearchFacetValuesQueryVariables>(
-        SearchFacetValuesDocument,
-        variables,
-        options
-      ) as Promise<SearchFacetValuesQuery>;
     }
   };
 }
