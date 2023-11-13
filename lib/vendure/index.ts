@@ -86,7 +86,7 @@ export async function vendureFetch<T>({
   variables?: Record<string, any>;
 }): Promise<{ status: number; body: T } | never> {
   try {
-    const authToken = typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+    const authToken = Cookies.get(AUTH_TOKEN_KEY);
     const headers = new Headers({
       'content-type': 'application/json'
     });
@@ -113,10 +113,9 @@ export async function vendureFetch<T>({
 
     const newAuthToken = result.headers.get('vendure-auth-token');
 
-    if (typeof window !== 'undefined' && newAuthToken) {
-      localStorage.setItem(AUTH_TOKEN_KEY, newAuthToken);
+    if (newAuthToken) {
+      Cookies.set(AUTH_TOKEN_KEY, newAuthToken);
     }
-
     const body = await result.json();
 
     if (body.errors) {
@@ -479,8 +478,9 @@ export async function addToCart(lines: { merchandiseId: string; quantity: number
       cartId: lines.merchandiseId,
       quantity: lines.quantity
     },
-    cache: 'no-store'
+    cache: 'default'
   });
+  console.log(res.body.data.addItemToOrder.id);
 
   return reshapeCart(res.body.data.addItemToOrder);
 }
@@ -514,15 +514,16 @@ export async function updateCart(lines: {
   return reshapeCart(res.body.data.adjustOrderLine);
 }
 
-export async function getCart(): Promise<Cart | null> {
+export async function getCart(): Promise<Cart | undefined> {
   const res = await vendureFetch<VendureCartOperation>({
     query: getCartQuery,
     tags: [TAGS.cart],
-    cache: 'no-store'
+    cache: 'default'
   });
 
+  console.log(res.body);
   if (!res.body.data.activeOrder) {
-    return null;
+    return undefined;
   }
 
   const cart = res.body.data.activeOrder.cart;
