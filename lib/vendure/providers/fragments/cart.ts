@@ -18,6 +18,7 @@ const cartFragment = /* GraphQL */ `
     }
     shippingWithTax
     totalWithTax
+    total
     customer {
       id
       firstName

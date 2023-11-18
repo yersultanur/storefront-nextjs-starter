@@ -22,7 +22,6 @@ export async function addItem(prevState: any, selectedVariantId: string | undefi
 
 export async function removeItem(prevState: any, lineId: string) {
   let cart = await getCart();
-  const cartId = cart?.id;
 
   try {
     await removeFromCart([lineId]);
@@ -41,7 +40,6 @@ export async function updateItemQuantity(
   }
 ) {
   let cart = await getCart();
-  const cartId = cart?.id;
 
   const { lineId, variantId, quantity } = payload;
 

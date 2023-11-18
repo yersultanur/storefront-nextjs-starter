@@ -1,8 +1,10 @@
+'use server';
+
 import { HIDDEN_PRODUCT_TAG, TAGS } from 'lib/constants';
 import { isVendureError } from 'lib/type-guards';
 import { ensureStartsWith } from 'lib/utils';
 import { revalidateTag } from 'next/cache';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   Product,
@@ -53,7 +55,6 @@ import {
   getProductsQuery,
   getProductRecommendationsQuery
 } from './providers/products/products';
-import { getToken } from 'next-auth/jwt';
 import Cookies from 'js-cookie';
 
 let endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
@@ -61,14 +62,6 @@ const key = process.env.VENDURE_API_KEY ?? `o6pez4wgv1`;
 const AUTH_TOKEN_KEY = 'auth_token';
 let languageCode: string | undefined;
 let channelToken: string | undefined;
-
-export function setLanguageCode(value: string | undefined) {
-  languageCode = value;
-}
-
-export function setChannelToken(value: string | undefined) {
-  channelToken = value;
-}
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
 
@@ -86,22 +79,14 @@ export async function vendureFetch<T>({
   variables?: Record<string, any>;
 }): Promise<{ status: number; body: T } | never> {
   try {
-    const authToken = Cookies.get(AUTH_TOKEN_KEY);
-    const headers = new Headers({
-      'content-type': 'application/json'
-    });
-    if (authToken) {
-      headers.append('authorization', `Bearer ${authToken}`);
-    }
-    if (channelToken) {
-      headers.append('vendure-token', channelToken);
-    }
-    if (languageCode) {
-      endpoint += `?languageCode=${languageCode}`;
-    }
+    const authToken = cookies().get(AUTH_TOKEN_KEY)?.value;
     const result = await fetch(endpoint, {
       method: 'POST',
-      headers,
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${authToken}`,
+        ...headers
+      },
       credentials: 'include',
       body: JSON.stringify({
         ...(query && { query }),
@@ -114,8 +99,9 @@ export async function vendureFetch<T>({
     const newAuthToken = result.headers.get('vendure-auth-token');
 
     if (newAuthToken) {
-      Cookies.set(AUTH_TOKEN_KEY, newAuthToken);
+      cookies().set(AUTH_TOKEN_KEY, newAuthToken);
     }
+
     const body = await result.json();
 
     if (body.errors) {
@@ -230,11 +216,9 @@ const reshapeLineItem = (lineItem: VendureLineItem): CartItem => {
     }
   };
   const quantity = lineItem.quantity;
-  const id = lineItem.id;
 
   return {
     ...lineItem,
-    id,
     merchandise,
     cost,
     quantity
@@ -478,9 +462,8 @@ export async function addToCart(lines: { merchandiseId: string; quantity: number
       cartId: lines.merchandiseId,
       quantity: lines.quantity
     },
-    cache: 'default'
+    cache: 'no-store'
   });
-  console.log(res.body.data.addItemToOrder.id);
 
   return reshapeCart(res.body.data.addItemToOrder);
 }
@@ -518,16 +501,15 @@ export async function getCart(): Promise<Cart | undefined> {
   const res = await vendureFetch<VendureCartOperation>({
     query: getCartQuery,
     tags: [TAGS.cart],
-    cache: 'default'
+    cache: 'no-store'
   });
 
-  console.log(res.body);
   if (!res.body.data.activeOrder) {
     return undefined;
   }
 
-  const cart = res.body.data.activeOrder.cart;
-  console.log(res.body.data.activeOrder.cart);
+  const cart = res.body.data.activeOrder;
+  console.log(cart);
   return reshapeCart(cart);
 }
 
