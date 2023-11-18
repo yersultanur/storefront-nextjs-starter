@@ -2,7 +2,7 @@
 
 # Next.js Commerce
 
-A Next.js 13 and App Router-ready ecommerce template featuring:
+A Next.js 14 and App Router-ready ecommerce template featuring:
 
 - Next.js App Router
 - Optimized for SEO using Next.js's Metadata
@@ -36,6 +36,14 @@ Vercel is happy to partner and work with any commerce provider to help them get 
 
 > Note: Providers, if you are looking to use similar products for your demo, you can [download these assets](https://drive.google.com/file/d/1q_bKerjrwZgHwCw0ovfUMW6He9VtepO_/view?usp=sharing).
 
+## Integrations
+
+Integrations enable upgraded or additional functionality for Next.js Commerce
+
+- [Orama](https://github.com/oramasearch/nextjs-commerce) ([Demo](https://vercel-commerce.oramasearch.com/))
+  - Upgrades search to include typeahead with dynamic re-rendering, vector-based similarity search, and JS-based configuration.
+  - Search runs entirely in the browser for smaller catalogs or on a CDN for larger.
+
 ## Running locally
 
 You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js Commerce. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables) for this, but a `.env` file is all that is necessary.
@@ -60,7 +68,7 @@ Your app should now be running on [localhost:3000](http://localhost:3000/).
 1. Select the `Vercel Solutions` scope.
 1. Connect to the existing `commerce-shopify` project.
 1. Run `vc env pull` to get environment variables.
-1. Run `pmpm dev` to ensure everything is working correctly.
+1. Run `pnpm dev` to ensure everything is working correctly.
 </details>
 
 ## Vercel, Next.js Commerce, and Shopify Integration Guide

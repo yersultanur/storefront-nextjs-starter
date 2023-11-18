@@ -23,8 +23,12 @@ export async function addItem(prevState: any, selectedVariantId: string | undefi
 export async function removeItem(prevState: any, lineId: string) {
   let cart = await getCart();
 
+  if (!cart) {
+    return 'Missing cart';
+  }
+
   try {
-    await removeFromCart([lineId]);
+    await removeFromCart(lineId);
     revalidateTag(TAGS.cart);
   } catch (e) {
     return 'Error removing item from cart';
@@ -41,20 +45,26 @@ export async function updateItemQuantity(
 ) {
   let cart = await getCart();
 
+  if (!cart) {
+    return 'Missing cart';
+  }
+
   const { lineId, variantId, quantity } = payload;
 
   try {
     if (quantity === 0) {
-      await removeFromCart([lineId]);
+      await removeFromCart(lineId);
       revalidateTag(TAGS.cart);
       return;
     }
 
-    await updateCart({
-      id: lineId,
-      merchandiseId: variantId,
-      quantity
-    });
+    await updateCart(
+      {
+        id: lineId,
+        merchandiseId: variantId,
+        quantity
+      }
+    );
     revalidateTag(TAGS.cart);
   } catch (e) {
     return 'Error updating item quantity';

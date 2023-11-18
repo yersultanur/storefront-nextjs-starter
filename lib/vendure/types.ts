@@ -518,7 +518,6 @@ export type Cart = Partial<VendureCart> & {
 };
 
 export type CartItem = VendureLineItem & {
-  id: string;
   quantity: number;
   cost: {
     totalAmount: Money;

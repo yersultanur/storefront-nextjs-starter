@@ -1,27 +1,25 @@
 import type { Metadata } from 'next';
 
 import Prose from 'components/prose';
-import { CHECKOUT_PAGE_PROPS } from 'lib/constants';
+// import { getPage } from 'lib/vendure';
 import { notFound } from 'next/navigation';
 
 export const runtime = 'edge';
 
-export const revalidate = 43200; // 12 hours
+export const revalidate = 43200; // 12 hours in seconds
 
 export async function generateMetadata({
   params
 }: {
   params: { page: string };
 }): Promise<Metadata> {
-  let page;
-
-  params.page === 'checkout' && (page = CHECKOUT_PAGE_PROPS);
+  const page = await getPage(params.page);
 
   if (!page) return notFound();
 
   return {
-    title: page.title,
-    description: '',
+    title: page.seo?.title || page.title,
+    description: page.seo?.description || page.bodySummary,
     openGraph: {
       publishedTime: page.createdAt,
       modifiedTime: page.updatedAt,
@@ -31,9 +29,7 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params }: { params: { page: string } }) {
-  let page;
-
-  params.page === 'checkout' && (page = CHECKOUT_PAGE_PROPS);
+  const page = await getPage(params.page);
 
   if (!page) return notFound();
 

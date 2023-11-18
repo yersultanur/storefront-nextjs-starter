@@ -55,7 +55,6 @@ import {
   getProductsQuery,
   getProductRecommendationsQuery
 } from './providers/products/products';
-import Cookies from 'js-cookie';
 
 let endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
 const key = process.env.VENDURE_API_KEY ?? `o6pez4wgv1`;
@@ -468,7 +467,7 @@ export async function addToCart(lines: { merchandiseId: string; quantity: number
   return reshapeCart(res.body.data.addItemToOrder);
 }
 
-export async function removeFromCart(lineIds: string[]): Promise<Cart> {
+export async function removeFromCart(lineIds: string): Promise<Cart> {
   const res = await vendureFetch<VendureRemoveFromCartOperation>({
     query: removeFromCartMutation,
     variables: {
