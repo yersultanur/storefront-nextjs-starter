@@ -508,7 +508,6 @@ export async function getCart(): Promise<Cart | undefined> {
   }
 
   const cart = res.body.data.activeOrder;
-  console.log(cart);
   return reshapeCart(cart);
 }
 
