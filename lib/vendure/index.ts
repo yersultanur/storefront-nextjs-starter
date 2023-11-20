@@ -1,5 +1,3 @@
-'use server';
-
 import { HIDDEN_PRODUCT_TAG, TAGS } from 'lib/constants';
 import { isVendureError } from 'lib/type-guards';
 import { ensureStartsWith } from 'lib/utils';
@@ -12,7 +10,6 @@ import {
   VendureCollectionsOperation,
   VendureAddToCartOperation,
   VendureCart,
-  VendureCreateCartOperation,
   VendureRemoveFromCartOperation,
   VendureUpdateCartOperation,
   VendureCartOperation,
@@ -55,12 +52,11 @@ import {
   getProductsQuery,
   getProductRecommendationsQuery
 } from './providers/products/products';
+import { token } from './session';
 
 let endpoint = process.env.NEXT_PUBLIC_VENDURE_BACKEND_API ?? `http://localhost:3000/shop-api`;
 const key = process.env.VENDURE_API_KEY ?? `o6pez4wgv1`;
 const AUTH_TOKEN_KEY = 'auth_token';
-let languageCode: string | undefined;
-let channelToken: string | undefined;
 
 type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
 
@@ -98,7 +94,7 @@ export async function vendureFetch<T>({
     const newAuthToken = result.headers.get('vendure-auth-token');
 
     if (newAuthToken) {
-      cookies().set(AUTH_TOKEN_KEY, newAuthToken);
+      token(newAuthToken);
     }
 
     const body = await result.json();
